@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nawabs · Owner & Admin Management</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            gold: '#E5C158',
+            goldLight: '#FBE8A6',
+            goldDark: '#B8860B',
+            charcoal: '#07070F',
+            deepSurface: '#07070F',
+            surfaceCard: 'rgba(20, 20, 38, 0.85)',
+            surfaceBorder: 'rgba(229, 193, 88, 0.2)'
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', 'sans-serif'],
+            serif: ['"Playfair Display"', 'Georgia', 'serif']
+          }
+        }
+      }
+    };
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root { color-scheme: dark; }
+    body {
+      background-color: #07070F;
+      color: #f1f5f9;
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    }
+    .font-serif { font-family: 'Playfair Display', Georgia, serif; }
+    .glass-card {
+      background: rgba(18, 18, 36, 0.8);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(229, 193, 88, 0.18);
+    }
+    .btn-gold {
+      background: linear-gradient(135deg, #F3D270 0%, #D4AF37 50%, #B8860B 100%);
+      color: #07070F;
+      font-weight: 800;
+      transition: all 0.2s ease;
+    }
+    .btn-gold:hover {
+      box-shadow: 0 4px 20px rgba(229, 193, 88, 0.35);
+      transform: translateY(-1px);
+    }
+    .veg-indicator {
+      width: 12px;
+      height: 12px;
+      border: 2px solid #22c55e;
+      border-radius: 3px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .veg-indicator::after {
+      content: '';
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #22c55e;
+    }
+    .nonveg-indicator {
+      width: 12px;
+      height: 12px;
+      border: 2px solid #ef4444;
+      border-radius: 3px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .nonveg-indicator::after {
+      content: '';
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: #ef4444;
+    }
+    @media print {
+      body * {
+        visibility: hidden;
+      }
+      #print-section, #print-section * {
+        visibility: visible;
+      }
+      #print-section {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+        color: #000;
+        background: #fff;
+      }
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- Header -->
+  <header class="sticky top-0 z-40 bg-[#0a0a1a]/95 backdrop-blur-md border-b border-gold/20 px-6 py-3.5">
+    <div class="max-w-7xl mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-2xl bg-gold/15 border border-gold/40 flex items-center justify-center text-xl shadow-lg">
+          👑
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-serif font-bold text-xl text-gold tracking-wide">Nawabs</h1>
+            <span class="px-2 py-0.5 rounded-full bg-gold/15 text-gold text-[11px] font-semibold border border-gold/30">Owner Dashboard</span>
+          </div>
+          <p class="text-xs text-gray-400">Business Analytics, Menu Configuration & QR Printing</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-3">
+
+        <a href="index.html" class="px-3.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs text-white border border-white/10 font-medium transition">
+          Portal Home
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="max-w-7xl mx-auto p-6 flex-1 w-full space-y-6">
+
+    <!-- Top Analytics Stats -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <!-- Total Revenue -->
+      <div class="p-4 rounded-3xl glass-card border border-gold/20">
+        <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">Today's Revenue</p>
+        <h3 id="stat-revenue" class="text-3xl font-extrabold text-gold mt-1">₹0</h3>
+        <span class="text-[11px] text-emerald-400 font-medium">Completed & served</span>
+      </div>
+
+      <!-- Total Orders -->
+      <div class="p-4 rounded-3xl glass-card border border-gold/20">
+        <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">Total Orders</p>
+        <h3 id="stat-orders" class="text-3xl font-extrabold text-white mt-1">0</h3>
+        <span class="text-[11px] text-gray-400 font-medium">Across all tables today</span>
+      </div>
+
+      <!-- Occupied Tables -->
+      <div class="p-4 rounded-3xl glass-card border border-gold/20">
+        <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">Active Tables</p>
+        <h3 id="stat-tables" class="text-3xl font-extrabold text-indigo-400 mt-1">0 / 20</h3>
+        <span class="text-[11px] text-indigo-300 font-medium">Currently dining</span>
+      </div>
+
+      <!-- Menu Items -->
+      <div class="p-4 rounded-3xl glass-card border border-gold/20">
+        <p class="text-xs font-medium text-gray-400 uppercase tracking-wider">Menu Items</p>
+        <h3 id="stat-menu-count" class="text-3xl font-extrabold text-emerald-400 mt-1">0</h3>
+        <span class="text-[11px] text-emerald-300 font-medium">Active in catalog</span>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="flex items-center gap-2 border-b border-gold/15 pb-2 overflow-x-auto no-scrollbar">
+      <button onclick="switchTab('analytics')" id="tab-btn-analytics" class="px-5 py-2.5 rounded-2xl text-xs font-bold bg-gold text-charcoal shadow-lg transition whitespace-nowrap">
+        📊 Overview & Ranking
+      </button>
+      <button onclick="switchTab('menu')" id="tab-btn-menu" class="px-5 py-2.5 rounded-2xl text-xs font-bold bg-surfaceCard text-gray-300 border border-surfaceBorder hover:text-white transition whitespace-nowrap">
+        🍽️ Menu Management
+      </button>
+      <button onclick="switchTab('cards')" id="tab-btn-cards" class="px-5 py-2.5 rounded-2xl text-xs font-bold bg-surfaceCard text-gray-300 border border-surfaceBorder hover:text-white transition whitespace-nowrap">
+        📖 Menu Cards (6 Sheets)
+      </button>
+      <button onclick="switchTab('staff')" id="tab-btn-staff" class="px-5 py-2.5 rounded-2xl text-xs font-bold bg-surfaceCard text-gray-300 border border-surfaceBorder hover:text-white transition whitespace-nowrap">
+        👥 Staff Accounts
+      </button>
+      <button onclick="switchTab('qr')" id="tab-btn-qr" class="px-5 py-2.5 rounded-2xl text-xs font-bold bg-surfaceCard text-gray-300 border border-surfaceBorder hover:text-white transition whitespace-nowrap">
+        📱 Table QR Codes
+      </button>
+      <button onclick="switchTab('settings')" id="tab-btn-settings" class="px-5 py-2.5 rounded-2xl text-xs font-bold bg-surfaceCard text-gray-300 border border-surfaceBorder hover:text-white transition whitespace-nowrap">
+        ⚙️ Settings & Wi-Fi
+      </button>
+    </div>
+
+    <!-- TAB 1: ANALYTICS & POPULAR ITEMS -->
+    <section id="view-analytics" class="space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Most Popular Dishes -->
+        <div class="p-5 rounded-3xl glass-card border border-gold/20 space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="font-serif font-bold text-base text-gold">🔥 Top 5 Best-Selling Dishes</h3>
+            <span class="text-xs text-gray-400">By quantity ordered</span>
+          </div>
+          <div id="popular-items-container" class="space-y-3">
+            <!-- Injected via JS -->
+          </div>
+        </div>
+
+        <!-- Recent Order Stream -->
+        <div class="p-5 rounded-3xl glass-card border border-gold/20 space-y-4">
+          <div class="flex items-center justify-between">
+            <h3 class="font-serif font-bold text-base text-gold">⚡ Recent Order Stream</h3>
+            <span class="text-xs text-gray-400">Live transaction feed</span>
+          </div>
+          <div id="recent-orders-container" class="space-y-2.5 max-h-80 overflow-y-auto">
+            <!-- Injected via JS -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: MENU MANAGEMENT -->
+    <section id="view-menu" class="hidden space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="font-serif font-bold text-lg text-gold">Restaurant Menu Catalog</h3>
+          <p class="text-xs text-gray-400">Toggle item availability or add new culinary creations</p>
+        </div>
+        <button onclick="openAddDishModal()" class="btn-gold px-4 py-2 rounded-xl text-xs font-bold shadow-lg flex items-center gap-1.5">
+          <span>+</span> Add New Dish
+        </button>
+      </div>
+
+      <div class="glass-card rounded-3xl border border-gold/20 overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-black/40 border-b border-gold/15 text-gray-400 uppercase text-[10px] tracking-wider">
+              <tr>
+                <th class="p-3.5">Item</th>
+                <th class="p-3.5">Category</th>
+                <th class="p-3.5">Diet</th>
+                <th class="p-3.5">Price</th>
+                <th class="p-3.5">Status</th>
+                <th class="p-3.5 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="menu-table-body" class="divide-y divide-white/5">
+              <!-- Injected via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: QR CODE GENERATOR & PRINTING -->
+    <section id="view-qr" class="hidden space-y-4">
+      <div class="flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <h3 class="font-serif font-bold text-lg text-gold">Dining Table QR Codes (T01 – T20)</h3>
+          <p class="text-xs text-gray-400">Print high-resolution table tent cards or open customer view directly</p>
+        </div>
+        <button onclick="window.print()" class="btn-gold px-4 py-2 rounded-xl text-xs font-bold shadow-lg flex items-center gap-1.5">
+          <span>🖨️</span> Print All Table Cards
+        </button>
+      </div>
+
+      <div id="qr-grid-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <!-- Injected via JS -->
+      </div>
+    </section>
+
+    <!-- TAB 4: SETTINGS & WI-FI -->
+    <section id="view-settings" class="hidden space-y-6">
+      <div class="max-w-2xl mx-auto p-6 rounded-3xl glass-card border border-gold/25 space-y-5">
+        <h3 class="font-serif font-bold text-lg text-gold">Restaurant Branding & Guest Wi-Fi</h3>
+        
+        <div class="space-y-4 text-xs">
+          <div>
+            <label class="block text-gray-400 font-semibold mb-1">Restaurant Name:</label>
+            <input type="text" id="settings-name" class="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-white/10 text-white focus:outline-none focus:border-gold" />
+          </div>
+
+          <div>
+            <label class="block text-gray-400 font-semibold mb-1">Tagline:</label>
+            <input type="text" id="settings-tagline" class="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-white/10 text-white focus:outline-none focus:border-gold" />
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-gray-400 font-semibold mb-1">Guest Wi-Fi Network (SSID):</label>
+              <input type="text" id="settings-wifi-ssid" class="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-white/10 text-white focus:outline-none focus:border-gold" />
+            </div>
+            <div>
+              <label class="block text-gray-400 font-semibold mb-1">Guest Wi-Fi Password:</label>
+              <input type="text" id="settings-wifi-pw" class="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-white/10 text-white focus:outline-none focus:border-gold font-mono" />
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-gray-400 font-semibold mb-1">Phone Contact:</label>
+              <input type="text" id="settings-phone" class="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-white/10 text-white focus:outline-none focus:border-gold" />
+            </div>
+            <div>
+              <label class="block text-gray-400 font-semibold mb-1">GST Tax Rate (%):</label>
+              <input type="number" id="settings-gst" value="5" class="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-white/10 text-white focus:outline-none focus:border-gold" />
+            </div>
+          </div>
+
+          <button onclick="saveSettings()" class="w-full btn-gold py-3 rounded-xl text-xs font-bold shadow-xl">
+            Save Settings (Syncs to All Customer Screens)
+          </button>
+        </div>
+
+        <div class="border-t border-white/10 pt-4 space-y-2">
+          <h4 class="font-bold text-xs text-rose-400">Danger Zone</h4>
+          <p class="text-[11px] text-gray-400">Clear all live transactions, table sessions, and reset order database:</p>
+          <button onclick="resetSystemData()" class="px-4 py-2 rounded-xl bg-rose-950 hover:bg-rose-900 border border-rose-500/40 text-xs font-bold text-rose-300 transition">
+            ⚠️ Reset Orders & Clear Tables
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB: MENU CARDS GALLERY -->
+    <section id="view-cards" class="hidden space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="font-serif font-bold text-lg text-gold">Official Restaurant Menu Cards</h3>
+          <p class="text-xs text-gray-400">Uploaded physical menu card pages (WebP format in /menu/ directory)</p>
+        </div>
+        <span class="text-xs px-3 py-1 rounded-full bg-gold/15 text-gold border border-gold/30 font-semibold">
+          6 Menu Pages Active
+        </span>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4" id="cards-gallery-grid">
+        <!-- Injected via JS -->
+      </div>
+    </section>
+
+    <!-- TAB: STAFF ACCOUNTS & PERMISSIONS -->
+    <section id="view-staff" class="hidden space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="font-serif font-bold text-lg text-gold">Staff Accounts (SQLite Database)</h3>
+          <p class="text-xs text-gray-400">Manage credentials for Reception, Chef KDS, and Managers stored in staff.db</p>
+        </div>
+        <button onclick="openAddStaffModal()" class="btn-gold px-4 py-2 rounded-xl text-xs font-bold shadow-lg flex items-center gap-1.5">
+          <span>+</span> Add Staff Member
+        </button>
+      </div>
+
+      <div class="glass-card rounded-3xl border border-gold/20 overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left text-xs">
+            <thead class="bg-black/40 border-b border-gold/15 text-gray-400 uppercase text-[10px] tracking-wider">
+              <tr>
+                <th class="p-3.5">Name</th>
+                <th class="p-3.5">Email</th>
+                <th class="p-3.5">Role</th>
+                <th class="p-3.5">Created</th>
+                <th class="p-3.5 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="staff-table-body" class="divide-y divide-white/5">
+              <!-- Injected via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Modal: Add New Dish -->
+  <div id="add-dish-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="w-full max-w-md rounded-3xl glass-card border border-gold/40 p-5 space-y-4">
+      <div class="flex items-center justify-between">
+        <h4 class="font-serif font-bold text-base text-gold">Add New Menu Dish</h4>
+        <button onclick="closeAddDishModal()" class="text-gray-400 hover:text-white">✕</button>
+      </div>
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block text-gray-300 mb-1">Dish Name:</label>
+          <input type="text" id="new-dish-name" placeholder="e.g. Gongura Royyalu Biryani" class="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white focus:outline-none focus:border-gold" />
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-gray-300 mb-1">Category:</label>
+            <select id="new-dish-category" class="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white focus:outline-none focus:border-gold">
+              <option value="Biryani">Biryani</option>
+              <option value="Starters">Starters</option>
+              <option value="Main Course">Main Course</option>
+              <option value="Soups">Soups</option>
+              <option value="Beverages">Beverages</option>
+              <option value="Desserts">Desserts</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-gray-300 mb-1">Price (₹):</label>
+            <input type="number" id="new-dish-price" placeholder="280" class="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white focus:outline-none focus:border-gold" />
+          </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-gray-300 mb-1">Dietary:</label>
+            <select id="new-dish-isveg" class="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white focus:outline-none focus:border-gold">
+              <option value="true">Pure Veg 🟢</option>
+              <option value="false">Non-Veg 🔴</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-gray-300 mb-1">Spice Level (1-3):</label>
+            <input type="number" id="new-dish-spice" min="0" max="3" value="2" class="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white focus:outline-none focus:border-gold" />
+          </div>
+        </div>
+        <div>
+          <label class="block text-gray-300 mb-1">Description:</label>
+          <textarea id="new-dish-desc" rows="2" placeholder="Rich Andhra authentic spices, cooked fresh..." class="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white focus:outline-none focus:border-gold"></textarea>
+        </div>
+        <button onclick="submitNewDish()" class="w-full btn-gold py-2.5 rounded-xl font-bold text-xs mt-2">
+          Save Dish to Menu
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Card Fullscreen Preview -->
+  <div id="card-preview-modal" class="fixed inset-0 z-50 bg-black/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="relative max-w-2xl w-full bg-surfaceCard border border-gold/40 rounded-3xl overflow-hidden p-4 space-y-3 max-h-[92vh] flex flex-col">
+      <div class="flex items-center justify-between">
+        <div>
+          <h4 id="preview-modal-title" class="font-serif font-bold text-base text-gold">Menu Card</h4>
+          <p id="preview-modal-subtitle" class="text-xs text-gray-400">High-Resolution Sheet</p>
+        </div>
+        <button onclick="closeCardPreviewModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-gray-300 hover:text-white flex items-center justify-center font-bold">✕</button>
+      </div>
+      <div class="flex-1 overflow-auto bg-black/50 rounded-2xl p-2 flex items-center justify-center">
+        <img id="preview-modal-img" src="" alt="Menu Sheet Preview" class="max-h-[75vh] object-contain rounded-xl border border-white/10" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Add Staff Member -->
+  <div id="add-staff-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="w-full max-w-md rounded-3xl glass-card border border-gold/40 p-5 space-y-4">
+      <div class="flex items-center justify-between">
+        <h4 class="font-serif font-bold text-base text-gold">Add New Staff Account</h4>
+        <button onclick="closeAddStaffModal()" class="text-gray-400 hover:text-white">✕</button>
+      </div>
+      <div class="space-y-3 text-xs">
+        <div>
+          <label class="block text-gray-300 mb-1">Full Name:</label>
+          <input type="text" id="new-staff-name" placeholder="e.g. Suresh Kumar" class="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white focus:outline-none focus:border-gold" />
+        </div>
+        <div>
+          <label class="block text-gray-300 mb-1">Email Address:</label>
+          <input type="email" id="new-staff-email" placeholder="e.g. suresh@restaurant.com" class="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white focus:outline-none focus:border-gold" />
+        </div>
+        <div>
+          <label class="block text-gray-300 mb-1">Password:</label>
+          <input type="password" id="new-staff-password" placeholder="Minimum 6 characters" class="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white focus:outline-none focus:border-gold" />
+        </div>
+        <div>
+          <label class="block text-gray-300 mb-1">Role:</label>
+          <select id="new-staff-role" class="w-full px-3 py-2 rounded-xl bg-black/40 border border-white/10 text-white focus:outline-none focus:border-gold">
+            <option value="Staff">Staff (Order Serving & Table Calls)</option>
+            <option value="Reception">Reception (Order Processing)</option>
+            <option value="Chef">Chef (Kitchen Display)</option>
+            <option value="Manager">Manager (Full Admin Privileges)</option>
+          </select>
+        </div>
+        <button onclick="submitNewStaff()" class="w-full btn-gold py-2.5 rounded-xl font-bold text-xs mt-2">
+          Create Staff Account
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Hidden Printable Sheet for All Tables -->
+  <div id="print-section" class="p-8 hidden">
+    <!-- Generated dynamically on print -->
+  </div>
+
+  <!-- Shared Scripts -->
+  <script src="shared.js"></script>
+
+  <script>
+    let currentTab = 'analytics';
+
+    function switchTab(tab) {
+      currentTab = tab;
+      ['analytics', 'menu', 'cards', 'staff', 'qr', 'settings'].forEach(t => {
+        const view = document.getElementById(`view-${t}`);
+        const btn = document.getElementById(`tab-btn-${t}`);
+        if (t === tab) {
+          view.classList.remove('hidden');
+          btn.className = 'px-5 py-2.5 rounded-2xl text-xs font-bold bg-gold text-charcoal shadow-lg transition whitespace-nowrap';
+        } else {
+          view.classList.add('hidden');
+          btn.className = 'px-5 py-2.5 rounded-2xl text-xs font-bold bg-surfaceCard text-gray-300 border border-surfaceBorder hover:text-white transition whitespace-nowrap';
+        }
+      });
+      renderAll();
+    }
+
+    function updateStats() {
+      const stats = GunturDB.getStats();
+      document.getElementById('stat-revenue').textContent = GunturUtils.formatCurrency(stats.totalRevenue);
+      document.getElementById('stat-orders').textContent = stats.totalOrders;
+      document.getElementById('stat-tables').textContent = `${stats.occupiedTables} / 20`;
+      document.getElementById('stat-menu-count').textContent = GunturDB.state.menu.length;
+    }
+
+    function renderAnalytics() {
+      updateStats();
+      const stats = GunturDB.getStats();
+
+      // Popular items
+      const popContainer = document.getElementById('popular-items-container');
+      if (!stats.popularItems.length) {
+        popContainer.innerHTML = '<p class="text-xs text-gray-400 text-center py-6">No order data yet today. Seed orders or place a customer order to view metrics.</p>';
+      } else {
+        const max = Math.max(...stats.popularItems.map(p => p.count), 1);
+        popContainer.innerHTML = stats.popularItems.map((p, idx) => {
+          const pct = Math.round((p.count / max) * 100);
+          return `
+            <div class="space-y-1">
+              <div class="flex justify-between text-xs">
+                <span class="font-medium text-white">#${idx + 1} ${p.name}</span>
+                <span class="text-gold font-bold">${p.count} ordered</span>
+              </div>
+              <div class="w-full bg-white/5 h-2 rounded-full overflow-hidden">
+                <div class="bg-gradient-to-r from-gold to-yellow-500 h-full rounded-full transition-all duration-500" style="width: ${pct}%"></div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // Recent orders stream
+      const recentContainer = document.getElementById('recent-orders-container');
+      const orders = GunturDB.state.orders.slice(0, 10);
+      if (!orders.length) {
+        recentContainer.innerHTML = '<p class="text-xs text-gray-400 text-center py-6">No transactions recorded yet.</p>';
+      } else {
+        recentContainer.innerHTML = orders.map(o => `
+          <div class="p-3 rounded-2xl bg-black/40 border border-white/5 flex items-center justify-between text-xs">
+            <div>
+              <div class="flex items-center gap-2">
+                <b class="text-gold font-mono">#${o.id}</b>
+                <span class="px-2 py-0.5 rounded-md bg-white/5 text-[10px] text-gray-300">Table ${o.tableId}</span>
+                <span class="text-[11px] text-goldLight font-bold">• ${o.guestName || 'Guest'}</span>
+              </div>
+              <p class="text-[11px] text-gray-400 mt-0.5">${o.items.map(it => `${it.name} (${it.qty})`).join(', ')}</p>
+            </div>
+            <div class="text-right">
+              <p class="font-bold text-white">${GunturUtils.formatCurrency(o.total)}</p>
+              <span class="text-[10px] text-gray-400">${o.status}</span>
+            </div>
+          </div>
+        `).join('');
+      }
+    }
+
+    // Menu Management Table
+    function renderMenuTable() {
+      const tbody = document.getElementById('menu-table-body');
+      const menu = GunturDB.state.menu;
+
+      tbody.innerHTML = menu.map(item => {
+        const isAvail = item.available !== false;
+        return `
+          <tr class="hover:bg-white/[0.02] transition">
+            <td class="p-3.5 flex items-center gap-3">
+              <img src="${item.image}" alt="${item.name}" class="w-9 h-9 rounded-lg object-cover bg-black/40" />
+              <div>
+                <b class="text-white">${item.name}</b>
+                <p class="text-[10px] text-gray-400 line-clamp-1">${item.desc}</p>
+              </div>
+            </td>
+            <td class="p-3.5 text-gray-300">${item.category}</td>
+            <td class="p-3.5">
+              <span class="${item.isVeg ? 'veg-indicator' : 'nonveg-indicator'}"></span>
+              <span class="text-[11px] text-gray-400 ml-1.5">${item.isVeg ? 'Veg' : 'Non-Veg'}</span>
+            </td>
+            <td class="p-3.5 font-bold text-gold">${GunturUtils.formatCurrency(item.price)}</td>
+            <td class="p-3.5">
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                isAvail ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-rose-500/20 text-rose-300 border border-rose-500/30'
+              }">
+                ${isAvail ? 'In Stock' : 'Sold Out'}
+              </span>
+            </td>
+            <td class="p-3.5 text-right space-x-2">
+              <button onclick="toggleAvailability(${item.id})" class="px-2.5 py-1 rounded-lg ${isAvail ? 'bg-rose-950/60 border border-rose-500/40 text-rose-300' : 'bg-emerald-950/60 border border-emerald-500/40 text-emerald-300'} text-[11px] font-semibold transition">
+                ${isAvail ? 'Mark Sold Out' : 'Mark Available'}
+              </button>
+              <button onclick="deleteMenuItem(${item.id})" class="text-gray-500 hover:text-rose-400 text-xs px-1" title="Delete Dish">✕</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function toggleAvailability(itemId) {
+      GunturDB.toggleMenuAvailability(itemId);
+      renderMenuTable();
+      GunturUtils.toast('Item availability updated & synced to customer phones!');
+    }
+
+    function deleteMenuItem(itemId) {
+      if (confirm('Are you sure you want to delete this dish from the menu?')) {
+        GunturDB.deleteMenuItem(itemId);
+        renderMenuTable();
+        GunturUtils.toast('Dish removed from menu.');
+      }
+    }
+
+    // Add dish modal
+    function openAddDishModal() {
+      document.getElementById('add-dish-modal').classList.remove('hidden');
+    }
+    function closeAddDishModal() {
+      document.getElementById('add-dish-modal').classList.add('hidden');
+    }
+    function submitNewDish() {
+      const name = document.getElementById('new-dish-name').value.trim();
+      const price = Number(document.getElementById('new-dish-price').value);
+      const category = document.getElementById('new-dish-category').value;
+      const isVeg = document.getElementById('new-dish-isveg').value === 'true';
+      const spice = Number(document.getElementById('new-dish-spice').value);
+      const desc = document.getElementById('new-dish-desc').value.trim();
+
+      if (!name || !price) {
+        GunturUtils.toast('Please enter name and price.', 'error');
+        return;
+      }
+
+      GunturDB.addMenuItem({
+        name,
+        price,
+        category,
+        isVeg,
+        spice,
+        desc: desc || 'Authentic Andhra preparation.',
+        emoji: isVeg ? '🌿' : '🍗',
+        image: 'https://images.unsplash.com/photo-1546833999-b9f581a1996d?auto=format&fit=crop&w=600&q=80'
+      });
+
+      closeAddDishModal();
+      renderMenuTable();
+      GunturUtils.toast('New dish added to catalog!', 'success');
+    }
+
+    // QR Codes Generation (T01 - T20)
+    function renderQRCodes() {
+      const container = document.getElementById('qr-grid-container');
+      const origin = window.location.origin;
+      const pathname = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
+      const baseUrl = `${origin}${pathname}/customer.html`;
+
+      const cardsHtml = [];
+      const printCards = [];
+
+      for (let i = 1; i <= 20; i++) {
+        const tid = 'T' + String(i).padStart(2, '0');
+        const targetUrl = `${baseUrl}?table=${tid}`;
+        const qrImgSrc = GunturUtils.generateSimpleSVGQR(targetUrl, 200);
+
+        cardsHtml.push(`
+          <div class="p-4 rounded-3xl glass-card border border-gold/25 text-center flex flex-col items-center justify-between space-y-3">
+            <div>
+              <div class="flex items-center justify-center gap-1.5 text-gold font-bold text-base mb-1">
+                <span>🌿</span>
+                <span>Nawabs</span>
+              </div>
+              <h4 class="font-black text-xl text-white">Table ${tid}</h4>
+              <p class="text-[10px] text-gray-400">Scan to Order · No App Needed</p>
+            </div>
+
+            <!-- QR Code -->
+            <div class="p-3 bg-white rounded-2xl shadow-xl flex items-center justify-center">
+              <img src="${qrImgSrc}" alt="QR for Table ${tid}" class="w-36 h-36 object-contain" />
+            </div>
+
+            <div class="w-full space-y-1.5">
+              <a href="${targetUrl}" target="_blank" class="w-full py-2 rounded-xl bg-gold/15 hover:bg-gold/25 text-gold border border-gold/30 text-xs font-bold transition block">
+                Open Table ${tid} View ↗
+              </a>
+              <span class="text-[9px] text-gray-400 font-mono break-all block truncate">${targetUrl}</span>
+            </div>
+          </div>
+        `);
+
+        // Print Card layout (Black on White for high quality paper print)
+        printCards.push(`
+          <div style="border: 2px solid #000; padding: 24px; text-align: center; border-radius: 12px; margin-bottom: 24px; page-break-inside: avoid; display: inline-block; width: 45%; margin-right: 4%;">
+            <h2 style="font-size: 20px; font-weight: bold; margin-bottom: 4px;">NAWABS</h2>
+            <p style="font-size: 12px; color: #555; margin-bottom: 12px;">Authentic Andhra Royal Kitchen</p>
+            <h1 style="font-size: 32px; font-weight: 900; margin: 8px 0;">TABLE ${tid}</h1>
+            <p style="font-size: 13px; font-weight: bold; margin-bottom: 12px;">SCAN TO ORDER &amp; CALL STAFF</p>
+            <img src="${qrImgSrc}" style="width: 180px; height: 180px; margin: 0 auto 12px;" />
+            <p style="font-size: 11px; color: #444;">Free Wi-Fi: ${GunturDB.state.settings.wifiSSID} · Table Session Auto-Locked</p>
+          </div>
+        `);
+      }
+
+      container.innerHTML = cardsHtml.join('');
+      document.getElementById('print-section').innerHTML = `
+        <div style="text-align: center; margin-bottom: 30px;">
+          <h1 style="font-size: 28px; font-weight: bold;">Nawabs · Dining Table QR Cards</h1>
+          <p>Cut along borders and place on table tent cards</p>
+        </div>
+        ${printCards.join('')}
+      `;
+    }
+
+    // Settings
+    function loadSettings() {
+      const s = GunturDB.state.settings;
+      document.getElementById('settings-name').value = s.name || '';
+      document.getElementById('settings-tagline').value = s.tagline || '';
+      document.getElementById('settings-wifi-ssid').value = s.wifiSSID || '';
+      document.getElementById('settings-wifi-pw').value = s.wifiPassword || '';
+      document.getElementById('settings-phone').value = s.phone || '';
+      document.getElementById('settings-gst').value = s.gstRate || 5;
+    }
+
+    function saveSettings() {
+      const updated = {
+        name: document.getElementById('settings-name').value,
+        tagline: document.getElementById('settings-tagline').value,
+        wifiSSID: document.getElementById('settings-wifi-ssid').value,
+        wifiPassword: document.getElementById('settings-wifi-pw').value,
+        phone: document.getElementById('settings-phone').value,
+        gstRate: Number(document.getElementById('settings-gst').value)
+      };
+      GunturDB.updateSettings(updated);
+      GunturUtils.toast('Settings updated! Wi-Fi & branding synced across all devices.', 'success');
+    }
+
+    function resetSystemData() {
+      if (confirm('Reset all live orders, service requests, and reset tables to empty?')) {
+        GunturDB.resetToDefaults();
+        renderAll();
+        GunturUtils.toast('System reset to default clean state.', 'info');
+      }
+    }
+
+    // TAB: Menu Cards Viewer
+    function renderMenuCards() {
+      const container = document.getElementById('cards-gallery-grid');
+      const cards = GunturDB.menuCards || [];
+      container.innerHTML = cards.map((c, i) => `
+        <div class="glass-card rounded-3xl border border-gold/25 overflow-hidden p-4 flex flex-col space-y-3 hover:border-gold/60 transition shadow-xl">
+          <div class="relative bg-black/60 rounded-2xl overflow-hidden aspect-[9/16] max-h-72 flex items-center justify-center cursor-pointer group" onclick="openCardPreviewModal(${i})">
+            <img src="${c.file}" alt="${c.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 flex items-center justify-center transition">
+              <span class="px-4 py-2 rounded-xl bg-gold text-charcoal font-bold text-xs shadow-xl">🔍 View Fullscreen</span>
+            </div>
+            <span class="absolute top-2 left-2 px-2.5 py-0.5 rounded-full bg-black/75 text-[10px] font-mono text-gold border border-gold/30">
+              Page ${i + 1}
+            </span>
+          </div>
+          <div class="flex-1">
+            <div class="flex items-center justify-between">
+              <h4 class="font-serif font-bold text-sm text-gold">${c.title}</h4>
+              <span class="text-[10px] px-2 py-0.5 rounded-full bg-white/10 text-gray-300">${c.category}</span>
+            </div>
+            <p class="text-xs text-gray-400 mt-1 line-clamp-2">${c.subtitle}</p>
+          </div>
+          <button onclick="openCardPreviewModal(${i})" class="w-full py-2 rounded-xl bg-surfaceCard hover:bg-gold hover:text-charcoal border border-surfaceBorder text-xs font-bold transition">
+            Preview Full Resolution
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function openCardPreviewModal(i) {
+      const cards = GunturDB.menuCards || [];
+      const c = cards[i];
+      if (!c) return;
+      document.getElementById('preview-modal-img').src = c.file;
+      document.getElementById('preview-modal-title').textContent = c.title;
+      document.getElementById('preview-modal-subtitle').textContent = `${c.subtitle} (Page ${i + 1} of ${cards.length})`;
+      document.getElementById('card-preview-modal').classList.remove('hidden');
+    }
+
+    function closeCardPreviewModal() {
+      document.getElementById('card-preview-modal').classList.add('hidden');
+    }
+
+    // TAB: Staff Accounts (SQLite DB)
+    let staffAccounts = [];
+
+    async function loadStaffList() {
+      const tbody = document.getElementById('staff-table-body');
+      tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-gray-400">Loading staff database...</td></tr>';
+      try {
+        const res = await fetch('/api/staff');
+        if (res.ok) {
+          const data = await res.json();
+          staffAccounts = data.staff || [];
+        } else {
+          staffAccounts = [
+            { email: 'staff@restaurant.com', name: 'Standard Staff', role: 'Staff', created_at: new Date().toISOString() },
+            { email: 'admin@restaurant.com', name: 'Restaurant Admin', role: 'Manager', created_at: new Date().toISOString() }
+          ];
+        }
+      } catch (e) {
+        staffAccounts = [
+          { email: 'staff@restaurant.com', name: 'Standard Staff', role: 'Staff', created_at: new Date().toISOString() },
+          { email: 'admin@restaurant.com', name: 'Restaurant Admin', role: 'Manager', created_at: new Date().toISOString() }
+        ];
+      }
+
+      if (!staffAccounts.length) {
+        tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-gray-400">No staff members found. Add an account above.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = staffAccounts.map(s => `
+        <tr class="hover:bg-white/5 transition">
+          <td class="p-3.5 font-bold text-white">${s.name || s.email.split('@')[0]}</td>
+          <td class="p-3.5 text-gray-300 font-mono text-[11px]">${s.email}</td>
+          <td class="p-3.5">
+            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold ${
+              s.role === 'Manager' ? 'bg-amber-500/20 text-amber-300 border border-amber-500/30' :
+              s.role === 'Chef' ? 'bg-teal-500/20 text-teal-300 border border-teal-500/30' :
+              s.role === 'Reception' ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' :
+              'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
+            }">${s.role || 'Staff'}</span>
+          </td>
+          <td class="p-3.5 text-gray-400 text-[11px]">${new Date(s.created_at || Date.now()).toLocaleDateString()}</td>
+          <td class="p-3.5 text-right space-x-2">
+            <button onclick="promptChangeStaffPassword('${s.email}')" class="px-2.5 py-1 rounded-lg bg-white/10 hover:bg-gold hover:text-charcoal text-[11px] font-bold transition">
+              Key
+            </button>
+            <button onclick="deleteStaffAccount('${s.email}')" class="px-2.5 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-600 text-rose-300 hover:text-white text-[11px] font-bold transition">
+              ✕
+            </button>
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    function openAddStaffModal() {
+      document.getElementById('add-staff-modal').classList.remove('hidden');
+    }
+
+    function closeAddStaffModal() {
+      document.getElementById('add-staff-modal').classList.add('hidden');
+    }
+
+    async function submitNewStaff() {
+      const name = document.getElementById('new-staff-name').value.trim();
+      const email = document.getElementById('new-staff-email').value.trim();
+      const password = document.getElementById('new-staff-password').value.trim();
+      const role = document.getElementById('new-staff-role').value;
+
+      if (!email || !password) {
+        return GunturUtils.toast('Email and Password are required!', 'error');
+      }
+
+      try {
+        const res = await fetch('/api/staff', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, password, role })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          GunturUtils.toast('Staff account created in SQLite database!', 'success');
+          closeAddStaffModal();
+          loadStaffList();
+        } else {
+          GunturUtils.toast(data.error || 'Failed to create staff account', 'error');
+        }
+      } catch (err) {
+        GunturUtils.toast('Could not connect to server API', 'error');
+      }
+    }
+
+    async function promptChangeStaffPassword(email) {
+      const pw = prompt(`Enter new password for ${email}:`);
+      if (!pw || pw.trim().length < 6) {
+        return GunturUtils.toast('Password must be at least 6 characters!', 'error');
+      }
+      try {
+        const res = await fetch(`/api/staff/${encodeURIComponent(email)}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: pw.trim() })
+        });
+        if (res.ok) {
+          GunturUtils.toast('Password updated in SQLite database!', 'success');
+        } else {
+          const d = await res.json();
+          GunturUtils.toast(d.error || 'Failed to update password', 'error');
+        }
+      } catch (e) {
+        GunturUtils.toast('Could not connect to server API', 'error');
+      }
+    }
+
+    async function deleteStaffAccount(email) {
+      if (!confirm(`Are you sure you want to delete staff account ${email}?`)) return;
+      try {
+        const res = await fetch(`/api/staff/${encodeURIComponent(email)}`, {
+          method: 'DELETE'
+        });
+        if (res.ok) {
+          GunturUtils.toast('Staff account deleted', 'success');
+          loadStaffList();
+        } else {
+          const d = await res.json();
+          GunturUtils.toast(d.error || 'Cannot delete staff account', 'error');
+        }
+      } catch (e) {
+        GunturUtils.toast('Could not connect to server API', 'error');
+      }
+    }
+
+    function renderAll() {
+      updateStats();
+      if (currentTab === 'analytics') renderAnalytics();
+      if (currentTab === 'menu') renderMenuTable();
+      if (currentTab === 'cards') renderMenuCards();
+      if (currentTab === 'staff') loadStaffList();
+      if (currentTab === 'qr') renderQRCodes();
+      if (currentTab === 'settings') loadSettings();
+    }
+
+    // ---- Admin Authentication Logic ----
+    let loggedInAdmin = null;
+
+    async function attemptAdminLogin() {
+      const emailInput = document.getElementById('admin-login-email');
+      const pwInput = document.getElementById('admin-login-password');
+      const errBox = document.getElementById('admin-login-error');
+      const btn = document.getElementById('admin-login-btn');
+      const btnText = document.getElementById('admin-login-btn-text');
+
+      const email = emailInput.value.trim();
+      const password = pwInput.value.trim();
+
+      if (!email || !password) {
+        errBox.textContent = 'Please enter both email and password.';
+        errBox.classList.remove('hidden');
+        return;
+      }
+
+      btnText.textContent = 'Authenticating...';
+      btn.disabled = true;
+      errBox.classList.add('hidden');
+
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+
+        if (data.ok && data.staff) {
+          if (data.staff.role !== 'Manager' && data.staff.role !== 'Admin') {
+            errBox.textContent = 'Access denied. Administrator privileges required.';
+            errBox.classList.remove('hidden');
+            btnText.textContent = 'Authenticate as Admin';
+            btn.disabled = false;
+            return;
+          }
+          loggedInAdmin = data.staff;
+          sessionStorage.setItem('ADMIN_STAFF', JSON.stringify(data.staff));
+          unlockAdminDashboard();
+        } else {
+          errBox.textContent = data.error || 'Invalid email or password.';
+          errBox.classList.remove('hidden');
+          pwInput.value = '';
+          pwInput.focus();
+        }
+      } catch (err) {
+        errBox.textContent = 'Server connection failed. Is the server running?';
+        errBox.classList.remove('hidden');
+      }
+
+      btnText.textContent = 'Authenticate as Admin';
+      btn.disabled = false;
+    }
+
+    function unlockAdminDashboard() {
+      document.getElementById('admin-login-gate').classList.add('hidden');
+      document.getElementById('admin-dashboard-content').classList.remove('hidden');
+      const nameEl = document.getElementById('logged-in-admin-name');
+      if (nameEl && loggedInAdmin) {
+        nameEl.textContent = `${loggedInAdmin.name} (${loggedInAdmin.role})`;
+      }
+      renderAll();
+    }
+
+    function logoutAdmin() {
+      sessionStorage.removeItem('ADMIN_STAFF');
+      loggedInAdmin = null;
+      document.getElementById('admin-dashboard-content').classList.add('hidden');
+      document.getElementById('admin-login-gate').classList.remove('hidden');
+      document.getElementById('admin-login-email').value = '';
+      document.getElementById('admin-login-password').value = '';
+      document.getElementById('admin-login-error').classList.add('hidden');
+    }
+
+    document.addEventListener('keydown', (e) => {
+      const gate = document.getElementById('admin-login-gate');
+      if (e.key === 'Enter' && gate && !gate.classList.contains('hidden')) {
+        attemptAdminLogin();
+      }
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const savedAdmin = sessionStorage.getItem('ADMIN_STAFF');
+      if (savedAdmin) {
+        try {
+          loggedInAdmin = JSON.parse(savedAdmin);
+          unlockAdminDashboard();
+        } catch (e) {}
+      }
+
+      GunturDB.subscribe(() => {
+        if (loggedInAdmin) renderAll();
+      });
+    });
+  </script>
+</body>
+</html>

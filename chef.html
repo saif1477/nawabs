@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nawabs · Kitchen Display System (KDS)</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            gold: '#E5C158',
+            goldDark: '#B8860B',
+            charcoal: '#07070F',
+            deepSurface: '#07070F',
+            surfaceCard: '#121224',
+            surfaceBorder: 'rgba(229, 193, 88, 0.2)'
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', 'sans-serif'],
+            serif: ['"Playfair Display"', 'Georgia', 'serif']
+          }
+        }
+      }
+    };
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root { color-scheme: dark; }
+    body {
+      background-color: #07070F;
+      color: #f8fafc;
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    }
+    .kds-card {
+      background: rgba(18, 18, 36, 0.85);
+      backdrop-filter: blur(16px);
+      transition: all 0.2s ease;
+    }
+    .veg-indicator {
+      width: 14px;
+      height: 14px;
+      border: 2px solid #22c55e;
+      border-radius: 3px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .veg-indicator::after {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #22c55e;
+    }
+    .nonveg-indicator {
+      width: 14px;
+      height: 14px;
+      border: 2px solid #ef4444;
+      border-radius: 3px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .nonveg-indicator::after {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #ef4444;
+    }
+    @keyframes kdsRedPulse {
+      0%, 100% { border-color: rgba(239, 68, 68, 0.9); box-shadow: 0 0 25px rgba(239, 68, 68, 0.4); }
+      50% { border-color: rgba(239, 68, 68, 0.4); box-shadow: 0 0 10px rgba(239, 68, 68, 0.2); }
+    }
+    .urgency-red-pulse {
+      animation: kdsRedPulse 1.8s infinite;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col p-4 md:p-6 select-none">
+
+  <!-- Kitchen Display Header -->
+  <header class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-white/10 mb-6">
+    <div class="flex items-center gap-3">
+      <div class="w-12 h-12 rounded-2xl bg-gold/15 border-2 border-gold/50 flex items-center justify-center text-2xl shadow-xl">
+        👨‍🍳
+      </div>
+      <div>
+        <div class="flex items-center gap-2">
+          <h1 class="font-serif font-bold text-2xl text-gold tracking-wide">Nawabs</h1>
+          <span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-bold border border-emerald-500/30">
+            Kitchen Display System (KDS)
+          </span>
+        </div>
+        <p class="text-xs text-gray-400 mt-0.5">Live Production Line & Urgency Queue</p>
+      </div>
+    </div>
+
+    <!-- Live Counters & Legend -->
+    <div class="flex items-center gap-3 flex-wrap">
+      <!-- In Queue Counter -->
+      <div class="px-4 py-2 rounded-2xl bg-indigo-950/60 border border-indigo-500/40 flex items-center gap-2.5">
+        <span class="text-xs text-indigo-300 font-semibold">In Queue:</span>
+        <span id="counter-queue" class="text-lg font-black text-white">0</span>
+      </div>
+
+      <!-- Preparing Counter -->
+      <div class="px-4 py-2 rounded-2xl bg-amber-950/60 border border-amber-500/40 flex items-center gap-2.5">
+        <span class="text-xs text-amber-300 font-semibold">Cooking:</span>
+        <span id="counter-preparing" class="text-lg font-black text-white">0</span>
+      </div>
+
+      <!-- Ready Counter -->
+      <div class="px-4 py-2 rounded-2xl bg-emerald-950/60 border border-emerald-500/40 flex items-center gap-2.5">
+        <span class="text-xs text-emerald-300 font-semibold">Ready:</span>
+        <span id="counter-ready" class="text-lg font-black text-white">0</span>
+      </div>
+
+      <!-- Urgency Legend -->
+      <div class="hidden lg:flex items-center gap-2 text-[11px] font-semibold px-3 py-2 rounded-2xl bg-black/40 border border-white/10">
+        <span class="flex items-center gap-1 text-emerald-400"><span class="w-2 h-2 rounded-full bg-emerald-400"></span> &lt;8m</span>
+        <span class="flex items-center gap-1 text-amber-400"><span class="w-2 h-2 rounded-full bg-amber-400"></span> 8–15m</span>
+        <span class="flex items-center gap-1 text-rose-400"><span class="w-2 h-2 rounded-full bg-rose-400"></span> &gt;15m (Urgent)</span>
+      </div>
+
+      <a href="index.html" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs text-white font-medium transition">
+        Exit KDS
+      </a>
+    </div>
+  </header>
+
+  <!-- KDS Filter Tabs -->
+  <div class="flex items-center justify-between mb-4">
+    <div class="flex items-center gap-2 text-xs font-bold">
+      <button onclick="setKDSFilter('active')" id="filter-btn-active" class="px-4 py-2 rounded-xl bg-gold text-charcoal shadow-lg">
+        Active Tickets (Queue & Cooking)
+      </button>
+      <button onclick="setKDSFilter('ready')" id="filter-btn-ready" class="px-4 py-2 rounded-xl bg-surfaceCard text-gray-300 border border-surfaceBorder hover:text-white">
+        Ready for Pickup
+      </button>
+      <button onclick="setKDSFilter('all')" id="filter-btn-all" class="px-4 py-2 rounded-xl bg-surfaceCard text-gray-300 border border-surfaceBorder hover:text-white">
+        All Tickets
+      </button>
+    </div>
+
+    <div class="text-xs text-gray-400">
+      Sorted by: <span class="text-gold font-semibold">Longest Wait Time First</span>
+    </div>
+  </div>
+
+  <!-- Tickets Display Grid -->
+  <main class="flex-1">
+    <div id="kds-grid-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      <!-- Injected via JS -->
+    </div>
+  </main>
+
+  <!-- Shared Scripts -->
+  <script src="shared.js"></script>
+
+  <script>
+    let kdsFilter = 'active'; // 'active', 'ready', 'all'
+
+    function setKDSFilter(filter) {
+      kdsFilter = filter;
+      ['active', 'ready', 'all'].forEach(f => {
+        const btn = document.getElementById(`filter-btn-${f}`);
+        if (f === filter) {
+          btn.className = 'px-4 py-2 rounded-xl bg-gold text-charcoal shadow-lg font-bold text-xs';
+        } else {
+          btn.className = 'px-4 py-2 rounded-xl bg-surfaceCard text-gray-300 border border-surfaceBorder hover:text-white font-bold text-xs';
+        }
+      });
+      renderKDS();
+    }
+
+    function updateCounters() {
+      const orders = GunturDB.state.orders;
+      const inQueue = orders.filter(o => o.status === 'ACCEPTED').length;
+      const preparing = orders.filter(o => o.status === 'PREPARING').length;
+      const ready = orders.filter(o => o.status === 'READY').length;
+
+      document.getElementById('counter-queue').textContent = inQueue;
+      document.getElementById('counter-preparing').textContent = preparing;
+      document.getElementById('counter-ready').textContent = ready;
+    }
+
+    function renderKDS() {
+      updateCounters();
+      const container = document.getElementById('kds-grid-container');
+      const allOrders = GunturDB.state.orders;
+
+      // Filter: KDS receives ONLY accepted, preparing, or ready orders
+      let tickets = allOrders.filter(o => ['ACCEPTED', 'PREPARING', 'READY'].includes(o.status));
+
+      if (kdsFilter === 'active') {
+        tickets = tickets.filter(o => ['ACCEPTED', 'PREPARING'].includes(o.status));
+      } else if (kdsFilter === 'ready') {
+        tickets = tickets.filter(o => o.status === 'READY');
+      }
+
+      // Sort by urgency: Longest waiting time first (oldest createdAt first)
+      tickets.sort((a, b) => a.createdAt - b.createdAt);
+
+      if (!tickets.length) {
+        container.innerHTML = `
+          <div class="col-span-full py-20 text-center kds-card rounded-3xl p-8 border border-white/5 space-y-3">
+            <span class="text-5xl">👨‍🍳</span>
+            <h3 class="font-serif font-bold text-xl text-white">All Kitchen Orders Clear!</h3>
+            <p class="text-sm text-gray-400">Great job chef! Waiting for new orders to be accepted by Reception.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = tickets.map(order => {
+        const urgency = GunturUtils.getUrgencyColor(order.createdAt);
+        const timer = GunturUtils.getElapsedMMSS(order.createdAt);
+        const isAccepted = order.status === 'ACCEPTED';
+        const isPreparing = order.status === 'PREPARING';
+        const isReady = order.status === 'READY';
+        const isRed = urgency.status === 'red';
+
+        return `
+          <div class="kds-card rounded-3xl p-5 border-2 ${urgency.border} ${isRed ? 'urgency-red-pulse' : ''} flex flex-col justify-between shadow-2xl relative">
+            <div>
+              <!-- Header Row: Table Number & Timer -->
+              <div class="flex items-start justify-between border-b border-white/10 pb-3 mb-3">
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="text-2xl font-black text-gold tracking-tight">Table ${order.tableId}</span>
+                    <span class="text-xs font-bold text-gray-300">• ${order.guestName || 'Guest'}</span>
+                  </div>
+                  <span class="text-xs font-mono text-gray-400 font-semibold">#${order.id}</span>
+                </div>
+
+                <!-- Urgency Timer -->
+                <div class="flex flex-col items-end">
+                  <div class="px-3 py-1 rounded-full font-mono text-xs font-black border flex items-center gap-1.5 ${urgency.badge}">
+                    <span class="text-sm">⏱</span>
+                    <span class="ticking-timer" data-ts="${order.createdAt}">${timer}</span>
+                  </div>
+                  <span class="text-[10px] text-gray-400 mt-1 font-semibold">${GunturUtils.formatTime(order.createdAt)}</span>
+                </div>
+              </div>
+
+              <!-- Status Badge -->
+              <div class="mb-3">
+                <span class="px-2.5 py-0.5 rounded-full text-[11px] font-bold ${
+                  isAccepted ? 'bg-indigo-500/20 text-indigo-300 border border-indigo-500/40' :
+                  isPreparing ? 'bg-amber-500/20 text-amber-300 border border-amber-500/40' :
+                  'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40'
+                }">
+                  ● ${isAccepted ? 'Waiting to Start' : isPreparing ? 'Cooking in Progress' : 'Ready on Pass'}
+                </span>
+              </div>
+
+              <!-- Items List -->
+              <div class="space-y-2.5 my-2">
+                ${order.items.map(it => `
+                  <div class="flex items-center justify-between p-2 rounded-xl bg-black/40 border border-white/5">
+                    <div class="flex items-center gap-2.5">
+                      <span class="${it.isVeg ? 'veg-indicator' : 'nonveg-indicator'}"></span>
+                      <span class="font-bold text-sm text-white">${it.name}</span>
+                    </div>
+                    <span class="text-base font-black text-gold bg-gold/15 px-2.5 py-0.5 rounded-lg border border-gold/30">
+                      ×${it.qty}
+                    </span>
+                  </div>
+                `).join('')}
+              </div>
+
+              <!-- Special Cooking Instructions / Notes -->
+              ${(order.notes || order.cookingInstructions) ? `
+                <div class="mt-3 p-3 rounded-2xl bg-amber-950/70 border-2 border-amber-500/50 text-amber-100 text-xs flex items-start gap-2.5 shadow-md">
+                  <span class="text-lg">🍳</span>
+                  <div class="space-y-0.5">
+                    <span class="font-black text-amber-300 uppercase tracking-wider text-[10px] block">Special Cooking Instruction:</span>
+                    <p class="font-bold text-white text-xs leading-relaxed">${order.notes || order.cookingInstructions}</p>
+                  </div>
+                </div>
+              ` : ''}
+            </div>
+
+            <!-- Action Controls -->
+            <div class="pt-4 border-t border-white/10 mt-4">
+              ${
+                isAccepted 
+                  ? `
+                    <button onclick="startPreparation('${order.id}')" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-charcoal font-black text-sm tracking-wide shadow-xl active:scale-95 transition flex items-center justify-center gap-2">
+                      <span>🔥</span>
+                      <span>Start Preparation</span>
+                    </button>
+                  `
+                  : isPreparing
+                    ? `
+                      <button onclick="markReady('${order.id}')" class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-black text-sm tracking-wide shadow-xl active:scale-95 transition flex items-center justify-center gap-2">
+                        <span>✅</span>
+                        <span>Mark Ready (Pass to Waiter)</span>
+                      </button>
+                    `
+                    : `
+                      <div class="py-2.5 text-center rounded-2xl bg-emerald-950/50 border border-emerald-500/40 text-emerald-300 text-xs font-bold">
+                        Food Ready on Counter · Awaiting Delivery
+                      </div>
+                    `
+              }
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function startPreparation(orderId) {
+      GunturDB.updateOrderStatus(orderId, 'PREPARING');
+      GunturUtils.toast(`Started cooking Order #${orderId}!`, 'info');
+      renderKDS();
+    }
+
+    function markReady(orderId) {
+      GunturDB.updateOrderStatus(orderId, 'READY');
+      GunturUtils.toast(`Order #${orderId} marked READY! Reception & Customer alerted.`, 'success');
+      renderKDS();
+    }
+
+    // Live ticking timer (update every second)
+    setInterval(() => {
+      document.querySelectorAll('.ticking-timer').forEach(el => {
+        const ts = Number(el.getAttribute('data-ts'));
+        if (ts) {
+          el.textContent = GunturUtils.getElapsedMMSS(ts);
+        }
+      });
+    }, 1000);
+
+    // Initial load & real-time sync
+    window.addEventListener('DOMContentLoaded', () => {
+      renderKDS();
+
+      GunturDB.subscribe((state, meta) => {
+        renderKDS();
+        if (meta && meta.type === 'ORDER_STATUS_CHANGED' && meta.newStatus === 'ACCEPTED') {
+          GunturUtils.toast(`🔔 New Ticket Received from Reception for Table ${meta.tableId}!`, 'info', 4000);
+          GunturSound.chimeKitchen();
+        }
+      });
+    });
+  </script>
+</body>
+</html>

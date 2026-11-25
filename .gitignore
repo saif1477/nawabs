@@ -1,0 +1,7 @@
+node_modules/
+.DS_Store
+Thumbs.db
+.env
+.env.*
+firebase-config.local.js
+supabase-config.local.js

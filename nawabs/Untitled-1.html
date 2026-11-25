@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+<title>Nawabs – Smart Restaurant</title>
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<script>
+tailwind.config={theme:{extend:{colors:{gold:'#D4AF37',charcoal:'#1a1a2e',deepbg:'#16213e',accent:'#0f3460',card:'#1a1a2e',surface:'#222244'}}}};
+</script>
+<!-- Firebase SDKs (Web CDN) -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+<script src="firebase-config.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap');
+:root{color-scheme:dark;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Inter',system-ui,sans-serif;background:#0a0a1a;color:#e0e0e0;overflow-x:hidden}
+h1,h2,h3{font-family:'Playfair Display',Georgia,serif}
+.glass{background:rgba(255,255,255,0.05);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,0.08)}
+.glass-gold{background:rgba(212,175,55,0.08);backdrop-filter:blur(12px);border:1px solid rgba(212,175,55,0.2)}
+.btn-gold{background:linear-gradient(135deg,#D4AF37,#c5a028);color:#1a1a2e;font-weight:600;border-radius:12px;padding:12px 28px;cursor:pointer;transition:all .3s;border:none;font-size:15px}
+.btn-gold:hover{transform:translateY(-2px);box-shadow:0 8px 25px rgba(212,175,55,0.3)}
+.btn-outline{background:transparent;color:#D4AF37;border:1.5px solid #D4AF37;border-radius:12px;padding:8px 18px;cursor:pointer;transition:all .3s;font-size:14px}
+.btn-outline:hover{background:rgba(212,175,55,0.1)}
+.btn-success{background:#22c55e;color:#fff;border:none;border-radius:10px;padding:8px 16px;cursor:pointer;font-weight:600}
+.page{display:none;min-height:70vh;animation:fadeIn .4s ease}
+.page.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.veg-dot,.nonveg-dot{width:14px;height:14px;border-radius:3px;display:inline-flex;align-items:center;justify-content:center;flex:none}
+.veg-dot{border:2px solid #22c55e}.nonveg-dot{border:2px solid #ef4444}
+.veg-dot::after,.nonveg-dot::after{content:'';width:7px;height:7px;border-radius:50%}
+.veg-dot::after{background:#22c55e}.nonveg-dot::after{background:#ef4444}
+.status-badge{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:.5px}
+.toast{position:fixed;top:calc(20px + env(safe-area-inset-top,0px));right:20px;z-index:9999;padding:16px 24px;border-radius:12px;color:#fff;font-weight:500;animation:slideIn .4s ease;max-width:360px;background:#22c55e}
+@keyframes slideIn{from{transform:translateX(100%);opacity:0}to{transform:translateX(0);opacity:1}}
+.tab.on{background:rgba(212,175,55,0.15);color:#D4AF37}
+input{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:12px;padding:12px 14px;color:#fff;outline:none;width:100%}
+input:focus{border-color:#D4AF37}
+.cell{aspect-ratio:1;font-size:36px;font-weight:700}
+.flash{animation:fl 1s infinite}@keyframes fl{50%{opacity:.45}}
+.svc{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:50}
+</style>
+</head>
+<body>
+<header id="hd" class="glass-gold sticky z-40" style="top:env(safe-area-inset-top,0px)"></header>
+<main id="app" class="max-w-5xl mx-auto px-4 py-6"></main>
+<div id="tc"></div>
+<script>
+const MENU=[
+{id:1,n:'Gongura Mutton',d:'Slow-cooked mutton in sour gongura',p:380,v:0,e:'🍖'},
+{id:2,n:'Gongura Chicken',d:'Tangy country-style chicken curry',p:280,v:0,e:'🍗'},
+{id:3,n:'Guntur Chilli Chicken',d:'Fiery dry fry, Guntur red chillies',p:260,v:0,e:'🌶️'},
+{id:4,n:'Natu Kodi Pulusu',d:'Country chicken in tamarind gravy',p:320,v:0,e:'🍲'},
+{id:5,n:'Gongura Pappu',d:'Toor dal with sorrel leaves',p:160,v:1,e:'🥣'},
+{id:6,n:'Gutti Vankaya Curry',d:'Stuffed brinjal, peanut-sesame masala',p:190,v:1,e:'🍆'},
+{id:7,n:'Pesarattu & Upma',d:'Green gram crepe, ginger chutney',p:120,v:1,e:'🥞'},
+{id:8,n:'Gongura Pachadi Meal',d:'Rice, ghee and gongura pickle',p:150,v:1,e:'🍚'},
+{id:9,n:'Guntur Chicken Biryani',d:'Dum biryani with raita',p:300,v:0,e:'🍛'}];
+
+/* ===== STAFF CREDENTIALS: Change Staff Email and Password here ===== */
+const STAFF_EMAIL = 'staff@restaurant.com';
+const STAFF_PASSWORD = 'password123';
+
+let fbAuth = null;
+try {
+  if(typeof FIREBASE_CONFIG !== 'undefined' && FIREBASE_CONFIG.apiKey) {
+    if(!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    fbAuth = firebase.auth();
+  }
+} catch(e){}
+
+const WIFI={ssid:'Nawabs_Dining_5G',pw:'Nawabs@2026'};
+/* ===== HOTEL DEFAULTS: edit this block to change the home page ===== */
+const HOTEL={logo:'🌿',name:'Nawabs',tagline:'Authentic Andhra flavours, served with a smile',about:'A family-run Andhra kitchen in Guntur, known for gongura dishes and Guntur chilli heat. Scan the QR code on your table to order without waiting.',hours:'Daily 11:00 AM – 11:00 PM',address:'Guntur, Andhra Pradesh',phone:'+91 00000 00000',highlights:[['🌶️','Guntur Spice','Fiery chilli heat in every plate'],['🥬','Gongura Specials','Tangy sorrel-leaf curries'],['📱','Staff Service','Real-time order management & kitchen display']]};
+const $=s=>document.querySelector(s);
+let S={v:0,orders:[],calls:[],ttt:{b:Array(9).fill(''),n:'X',X:null,O:null,w:''}};
+let me=null,cart={},tab='menu',filter='all',staffTab='orders',home=!/^#table/.test(location.hash);
+
+function checkTableHash(){
+  const m=location.hash.match(/^#table(\d+)$/);
+  if(m&&(!me||me.role==='customer')){me={role:'customer',table:+m[1],name:'Table '+m[1]};home=false;tab='menu'}
+}
+checkTableHash();
+
+/* ---------- sync: room (when available) + same-browser tabs ---------- */
+let room=null;const bc=('BroadcastChannel' in window)?new BroadcastChannel('gg-sync'):null;
+function send(t,d){try{bc&&bc.postMessage({t,d})}catch(e){}try{room&&room.emit(t,d)}catch(e){}}
+function recv(t,d){
+  if(t==='hello'){send('state',S);return}
+  if(t==='state'&&d&&d.v>S.v){const o=S;S=d;notify(o,d);draw()}
+}
+if(bc)bc.onmessage=e=>recv(e.data.t,e.data.d);
+(async()=>{try{room=await claude.use('room');if(room){['state','hello'].forEach(t=>room.on(t,m=>recv(t,m&&m.data!==undefined?m.data:m)));room.emit('hello',1)}}catch(e){}})();
+send('hello',1);
+function commit(){S.v=Date.now();send('state',S);draw()}
+function toast(m,c){const t=document.createElement('div');t.className='toast';if(c)t.style.background=c;t.textContent=m;$('#tc').appendChild(t);setTimeout(()=>t.remove(),2200)}
+const mins=t=>{const s=Math.floor((Date.now()-t)/1000);return Math.floor(s/60)+'m '+String(s%60).padStart(2,'0')+'s'};
+const rupee=n=>'₹'+n;
+
+/* ---------- header & routing ---------- */
+function head(){
+  const h=$('#hd');
+  if(!me){
+    h.innerHTML=`<div class='max-w-5xl mx-auto px-4 py-3 flex items-center justify-between'><h1 class='text-2xl text-gold font-bold'>${HOTEL.logo} ${HOTEL.name}</h1><button class='btn-outline text-xs sm:text-sm' onclick="home=!home;draw()">${home?'Staff Login':'Hotel Home'}</button></div>`;
+    return;
+  }
+  const who=me.role==='customer'?'Table '+me.table:`Staff (${me.name||me.email||me.id||'Active'})`;
+  let nav='';
+  if(me.role==='customer'){
+    nav=['menu','cart','track','games'].map(t=>`<button class="tab px-3 py-2 rounded-lg ${tab===t?'on':''}" onclick="tab='${t}';draw()">${{menu:'Menu',cart:'Cart ('+Object.values(cart).reduce((a,b)=>a+b,0)+')',track:'My Order',games:'Wi‑Fi & Games'}[t]}</button>`).join('');
+  } else if(me.role==='staff'){
+    const nwCount=S.orders.filter(o=>o.s==='new').length+S.calls.filter(c=>!c.done).length;
+    const ktCount=S.orders.filter(o=>['accepted','cooking'].includes(o.s)).length;
+    nav=`<button class="tab px-3 py-2 rounded-lg ${staffTab==='orders'?'on':''}" onclick="staffTab='orders';draw()">🛎️ Orders & Calls ${nwCount?`<span class="ml-1 px-1.5 py-0.5 rounded-full text-xs bg-red-500/30 text-red-300">${nwCount}</span>`:''}</button><button class="tab px-3 py-2 rounded-lg ${staffTab==='kitchen'?'on':''}" onclick="staffTab='kitchen';draw()">👨‍🍳 Kitchen ${ktCount?`<span class="ml-1 px-1.5 py-0.5 rounded-full text-xs bg-amber-500/30 text-amber-300">${ktCount}</span>`:''}</button>`;
+  }
+  h.innerHTML=`<div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between gap-2 flex-wrap"><h1 class="text-xl text-gold font-bold">${HOTEL.logo} ${HOTEL.name} <span class="text-sm text-gray-400 font-normal">· ${who}</span></h1><nav class="flex gap-1 text-sm flex-wrap">${nav}<button class="tab px-3 py-2 rounded-lg" onclick="me=null;home=true;if(location.hash)location.hash='';draw()">Logout</button></nav></div>`}
+
+function draw(){head();const a=$('#app');
+  if(!me)a.innerHTML=home?homePage():login();
+  else if(me.role==='customer')a.innerHTML=customer()+svcBtn();
+  else if(me.role==='staff')a.innerHTML=staffTab==='kitchen'?chef():reception();
+  else a.innerHTML=reception()}
+
+/* ---------- home, sound & alerts ---------- */
+function homePage(){
+  const H=HOTEL;
+  return `<section class='rounded-3xl p-8 md:p-14 text-center mb-8' style='background:linear-gradient(135deg,#16213e,#0f3460)'><div class='text-6xl mb-3'>${H.logo}</div><h2 class='text-4xl md:text-5xl font-bold text-gold mb-2'>${H.name}</h2><p class='text-lg text-gray-300 mb-6'>${H.tagline}</p><div class='flex gap-3 justify-center flex-wrap'><button class='btn-gold' onclick="home=false;draw()">Staff Login</button></div></section><div class='grid gap-4 md:grid-cols-3 mb-8'>${H.highlights.map(h=>`<div class='glass rounded-2xl p-5 text-center'><div class='text-3xl mb-2'>${h[0]}</div><h3 class='font-bold mb-1'>${h[1]}</h3><p class='text-sm text-gray-400'>${h[2]}</p></div>`).join('')}</div><div class='grid gap-4 md:grid-cols-2'><div class='glass rounded-2xl p-5'><h3 class='text-xl text-gold font-bold mb-2'>About us</h3><p class='text-sm text-gray-300'>${H.about}</p></div><div class='glass rounded-2xl p-5 text-sm space-y-1'><h3 class='text-xl text-gold font-bold mb-2'>Visit us</h3><p>🕒 ${H.hours}</p><p>📍 ${H.address}</p><p>📞 ${H.phone}</p></div></div>`}
+
+let AC;function beep(n){try{AC=AC||new (window.AudioContext||window.webkitAudioContext)();for(let i=0;i<n;i++){const o=AC.createOscillator(),g=AC.createGain();o.connect(g);g.connect(AC.destination);o.frequency.value=880;g.gain.value=.15;o.start(AC.currentTime+i*.25);o.stop(AC.currentTime+i*.25+.15)}}catch(e){}}
+function notify(o,n){if(!me)return;const c=(x,f)=>x.filter(f).length;
+  if(me.role==='staff'){
+    if(c(n.calls,k=>!k.done)>c(o.calls,k=>!k.done)){beep(3);toast('🔔 Table '+n.calls.find(k=>!k.done).table+' needs service!','#ef4444')}
+    if(c(n.orders,x=>x.s==='ready')>c(o.orders,x=>x.s==='ready')){beep(2);toast('🍽️ Food ready — send staff to serve','#f59e0b')}
+    if(c(n.orders,x=>x.s==='new')>c(o.orders,x=>x.s==='new')){beep(1);toast('📥 New order received')}
+    if(c(n.orders,x=>x.s==='accepted')>c(o.orders,x=>x.s==='accepted')){beep(1);toast('👨‍🍳 Order sent to kitchen')}}
+  if(me.role==='customer'&&c(n.orders,x=>x.table===me.table&&x.s==='served')>c(o.orders,x=>x.table===me.table&&x.s==='served'))toast('🍽️ Your food is on its way!')}
+
+/* ---------- staff login ---------- */
+function login(){
+  return `<div class="max-w-md mx-auto">
+  <button class="text-sm text-gold mb-3 flex items-center gap-1 hover:underline cursor-pointer" onclick="home=true;draw()">← Hotel home</button>
+  <div class="glass rounded-2xl p-6 sm:p-8 space-y-4 shadow-xl">
+    <div class="text-center mb-2">
+      <div class="text-4xl mb-2">🔐</div>
+      <h2 class="text-2xl font-bold text-gold">Staff Login</h2>
+      <p class="text-sm text-gray-400 mt-1">Enter your Email and Password to continue</p>
+    </div>
+    <div>
+      <label class="block text-xs uppercase tracking-wider text-gray-400 font-semibold mb-1">Email Address</label>
+      <input id="staff_email" type="email" placeholder="e.g. staff@restaurant.com" autocomplete="username"/>
+    </div>
+    <div>
+      <label class="block text-xs uppercase tracking-wider text-gray-400 font-semibold mb-1">Password</label>
+      <input id="staff_pw" type="password" placeholder="Enter password" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"/>
+    </div>
+    <button class="btn-gold w-full py-3 text-base font-semibold mt-2" onclick="doLogin()">Login</button>
+    <div class="p-3 rounded-xl bg-white/5 border border-white/10 text-xs text-gray-400 text-center">
+      Default credentials: Email <span class="text-gold font-mono font-bold">${STAFF_EMAIL}</span> &bull; Password <span class="text-gold font-mono font-bold">${STAFF_PASSWORD}</span>
+    </div>
+  </div></div>`}
+
+async function doLogin(){
+  const email=($('#staff_email')?.value||'').trim().toLowerCase();
+  const pw=($('#staff_pw')?.value||'').trim();
+  if(!email)return toast('Please enter Email Address','#ef4444');
+  if(!pw)return toast('Please enter Password','#ef4444');
+
+  if(fbAuth){
+    try {
+      const cred = await fbAuth.signInWithEmailAndPassword(email, pw);
+      if(cred && cred.user){
+        beep(0);
+        me={role:'staff',email:cred.user.email,id:cred.user.email,name:cred.user.email.split('@')[0]};
+        staffTab='orders';
+        toast('Welcome (Firebase), '+cred.user.email+'!');
+        draw();
+        return;
+      }
+    } catch(err){
+      console.warn('Firebase Auth note:', err.message);
+    }
+  }
+
+  if(email===STAFF_EMAIL.toLowerCase()&&pw===STAFF_PASSWORD){
+    beep(0);
+    me={role:'staff',email:email,id:email,name:email.split('@')[0]};
+    staffTab='orders';
+    toast('Welcome, '+email+'!');
+    draw();
+  } else {
+    beep(2);
+    toast('Invalid Email or Password','#ef4444');
+  }
+}
+
+/* ---------- customer ---------- */
+function customer(){
+  if(tab==='menu')return `<h2 class="text-3xl font-bold mb-4">Menu</h2><div class="flex gap-2 mb-4">${['all','veg','non'].map(f=>`<button class="btn-outline" style="${filter===f?'background:rgba(212,175,55,.15)':''}" onclick="filter='${f}';draw()">${{all:'All',veg:'Veg',non:'Non-veg'}[f]}</button>`).join('')}</div>
+  <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">${MENU.filter(i=>filter==='all'||(filter==='veg'?i.v:!i.v)).map(i=>`<div class="glass rounded-2xl p-5 flex flex-col gap-3"><div class="flex justify-between"><span class="text-4xl">${i.e}</span><span class="${i.v?'veg-dot':'nonveg-dot'}"></span></div><div><h3 class="text-lg font-bold">${i.n}</h3><p class="text-sm text-gray-400">${i.d}</p></div><div class="flex justify-between items-center mt-auto"><span class="text-gold font-semibold">${rupee(i.p)}</span><button class="btn-gold" style="padding:8px 18px" onclick="add(${i.id})">Add</button></div></div>`).join('')}</div>`;
+  if(tab==='cart'){
+    const ids=Object.keys(cart);if(!ids.length)return '<p class="text-gray-400">Your cart is empty.</p>';
+    let tot=0;return `<h2 class="text-3xl font-bold mb-4">Your Cart</h2><div class="space-y-3">${ids.map(id=>{const i=MENU.find(m=>m.id==id),q=cart[id];tot+=i.p*q;return `<div class="glass rounded-xl p-4 flex items-center justify-between gap-3"><span>${i.e} ${i.n}</span><span class="flex items-center gap-3"><button class="btn-outline" style="padding:2px 12px" onclick="chg(${id},-1)">−</button>${q}<button class="btn-outline" style="padding:2px 12px" onclick="chg(${id},1)">+</button></span><span class="text-gold w-20 text-right">${rupee(i.p*q)}</span></div>`}).join('')}
+    <div class="glass-gold rounded-xl p-4 flex justify-between"><span>Total</span><b class="text-gold text-2xl">${rupee(tot)}</b></div><button class="btn-gold w-full" onclick="placeOrder(${tot})">Send to Reception</button></div>`}
+  if(tab==='track'){
+    const mine=S.orders.filter(o=>o.table===me.table);if(!mine.length)return '<p class="text-gray-400">No orders yet from your table.</p>';
+    const L={new:['Waiting for reception','#3b82f6'],accepted:['Sent to chef','#a78bfa'],cooking:['Being cooked','#f59e0b'],ready:['Ready — staff is on the way','#22c55e'],served:['Served · enjoy!','#9ca3af']};
+    return `<h2 class="text-3xl font-bold mb-4">Table ${me.table} Orders</h2><div class="space-y-3">${mine.map(o=>`<div class="glass rounded-xl p-4"><div class="flex justify-between flex-wrap gap-2"><b>Order #${o.id} · ${o.by}</b><span class="status-badge" style="background:${L[o.s][1]}22;color:${L[o.s][1]}">${L[o.s][0]}</span></div><p class="text-sm text-gray-400 my-2">${o.items.map(x=>x.n+' × '+x.q).join(', ')}</p><p class="text-xs text-gray-500">Ordered ${mins(o.t)} ago</p></div>`).join('')}</div>`}
+  return games()}
+function svcBtn(){const open=S.calls.some(c=>c.table===me.table&&!c.done);return `<button class="btn-gold svc ${open?'':'pulse'}" onclick="callStaff()">${open?'✋ Staff called…':'🔔 Call Staff'}</button>`}
+function add(id){cart[id]=(cart[id]||0)+1;head();toast('Added')}
+function chg(id,d){cart[id]+=d;if(cart[id]<=0)delete cart[id];draw()}
+function placeOrder(tot){
+  const items=Object.keys(cart).map(id=>({n:MENU.find(m=>m.id==id).n,q:cart[id]}));
+  const id=(S.orders.reduce((m,o)=>Math.max(m,o.id),0))+1;
+  S.orders.unshift({id,table:me.table,by:me.name,items,total:tot,s:'new',t:Date.now()});cart={};tab='games';commit();toast('Sent to reception!')}
+function callStaff(){if(S.calls.some(c=>c.table===me.table&&!c.done))return;S.calls.unshift({id:Date.now(),table:me.table,t:Date.now(),done:false});commit();toast('Staff is on the way')}
+
+/* ---------- Wi-Fi & games ---------- */
+function games(){
+  const g=S.ttt,mine=g.X===me.table?'X':g.O===me.table?'O':'';
+  return `<div class="grid gap-4 md:grid-cols-2"><div class="glass-gold rounded-2xl p-5"><h3 class="text-xl font-bold text-gold mb-2">📶 Free Wi‑Fi</h3><p class="text-sm text-gray-400">Network</p><p class="font-semibold mb-2">${WIFI.ssid}</p><p class="text-sm text-gray-400">Password</p><p class="font-mono text-lg">${WIFI.pw}</p><p class="text-xs text-gray-500 mt-3">Your order is on its way — enjoy a game while you wait.</p></div>
+  <div class="glass rounded-2xl p-5"><h3 class="text-xl font-bold mb-1">🎮 Tic‑Tac‑Toe</h3><p class="text-sm text-gray-400 mb-3">Play with your own table or challenge another table. Same-table guests share one side.</p>
+  <div class="text-sm mb-3">X: ${g.X?'Table '+g.X:'<i>open</i>'} · O: ${g.O?'Table '+g.O:'<i>open</i>'} ${mine?'· <b class="text-gold">You are '+mine+'</b>':''}</div>
+  <div class="grid grid-cols-3 gap-2 max-w-[240px]">${g.b.map((c,i)=>`<button class="glass rounded-xl cell ${c==='X'?'text-gold':''}" onclick="move(${i})">${c}</button>`).join('')}</div>
+  <p class="mt-3 text-sm">${g.w?(g.w==='draw'?'Draw!':'🏆 '+g.w+' wins!'):'Next: '+g.n}</p>
+  <div class="flex gap-2 mt-3">${mine?'':`<button class="btn-outline" onclick="joinG()">Join game</button>`}<button class="btn-outline" onclick="resetG()">New game</button></div></div></div>`}
+function joinG(){const g=S.ttt;if(!g.X)g.X=me.table;else if(!g.O&&g.X!==me.table)g.O=me.table;else if(!g.O)g.O=me.table;else return toast('Game is full');commit()}
+function resetG(){S.ttt={b:Array(9).fill(''),n:'X',X:S.ttt.X,O:S.ttt.O,w:''};commit()}
+function move(i){const g=S.ttt,m=g.X===me.table&&g.n==='X'?'X':g.O===me.table&&g.n==='O'?'O':'';
+  if(!m||g.b[i]||g.w)return toast(m?'Pick an empty cell':'Join first / wait for your turn');
+  g.b[i]=m;g.n=m==='X'?'O':'X';
+  const L=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+  if(L.some(l=>l.every(k=>g.b[k]===m)))g.w=m;else if(g.b.every(c=>c))g.w='draw';commit()}
+
+/* ---------- orders & reception view ---------- */
+function reception(){
+  const nw=S.orders.filter(o=>o.s==='new'),calls=S.calls.filter(c=>!c.done),rest=S.orders.filter(o=>o.s!=='new'&&o.s!=='ready'),rdy=S.orders.filter(o=>o.s==='ready');
+  return `${calls.length?`<div class='flash rounded-xl p-4 mb-4 text-center font-bold' style='background:#ef4444;color:#fff'>🚨 Service needed at table ${calls.map(c=>c.table).join(', ')}</div>`:''}<h2 class="text-3xl font-bold mb-4">Orders & Service Desk</h2><h3 class='text-xl text-gold mb-2'>🍽️ Ready to serve (${rdy.length})</h3><div class='space-y-2 mb-6'>${rdy.map(o=>`<div class='glass-gold rounded-xl p-3 flex justify-between items-center gap-2'><span><b>Table ${o.table}</b> · #${o.id} · ${o.items.map(x=>x.q+'× '+x.n).join(', ')}</span><button class='btn-success' onclick="setS(${o.id},'served')">Send staff to serve</button></div>`).join('')||'<p class="text-gray-500 text-sm">Nothing waiting</p>'}</div>
+  <h3 class="text-xl text-gold mb-2">🔔 Service requests (${calls.length})</h3><div class="space-y-2 mb-6">${calls.map(c=>`<div class="glass-gold rounded-xl p-3 flex justify-between items-center"><span><b>Table ${c.table}</b> needs help · ${mins(c.t)}</span><button class="btn-success" onclick="callDone(${c.id})">Attended</button></div>`).join('')||'<p class="text-gray-500 text-sm">None</p>'}</div>
+  <h3 class="text-xl text-gold mb-2">📥 New orders (${nw.length})</h3><div class="space-y-3 mb-6">${nw.map(o=>`<div class="glass rounded-xl p-4"><div class="flex justify-between"><b>Table ${o.table} · #${o.id}</b><span class="text-gold">${rupee(o.total)}</span></div><p class="text-sm text-gray-400 my-2">${o.items.map(x=>x.n+' × '+x.q).join(', ')}</p><button class="btn-success" onclick="setS(${o.id},'accepted')">Accept & send to kitchen</button></div>`).join('')||'<p class="text-gray-500 text-sm">No new orders</p>'}</div>
+  <h3 class="text-xl mb-2">Progress</h3><div class="space-y-2">${rest.map(o=>`<div class="glass rounded-xl p-3 flex justify-between text-sm"><span>Table ${o.table} · #${o.id}</span><span class="status-badge" style="background:#ffffff14">${o.s}</span></div>`).join('')}</div>`}
+function callDone(id){S.calls.find(c=>c.id===id).done=true;commit()}
+function setS(id,s){S.orders.find(o=>o.id===id).s=s;if(s==='accepted')S.orders.find(o=>o.id===id).aAt=Date.now();commit()}
+
+/* ---------- kitchen display ---------- */
+function chef(){
+  const act=S.orders.filter(o=>!['new','ready','served'].includes(o.s)),tables=[...new Set(act.map(o=>o.table))].sort((a,b)=>a-b);
+  return `<h2 class="text-3xl font-bold mb-4">Kitchen Display</h2>${tables.length?'<div class="grid gap-4 md:grid-cols-2">':'<p class="text-gray-400">No active tickets.</p>'}${tables.map(t=>{const os=act.filter(o=>o.table===t);return `<div class="glass-gold rounded-2xl p-4"><h3 class="text-xl font-bold text-gold mb-2">Table ${t}</h3>${os.map(o=>{const late=Date.now()-o.t>15*60000;return `<div class="glass rounded-xl p-3 mb-2"><div class="flex justify-between text-sm"><b>#${o.id}</b><span style="color:${late?'#ef4444':'#22c55e'}">⏱ ${mins(o.t)}</span></div><ul class="my-2 text-sm">${o.items.map(x=>`<li>${x.q} × ${x.n}</li>`).join('')}</ul>${o.s==='accepted'?`<button class="btn-gold" style="padding:6px 16px" onclick="setS(${o.id},'cooking')">Start cooking</button>`:`<button class="btn-success" onclick="setS(${o.id},'ready')">✅ Ready to serve — alert staff</button>`}</div>`}).join('')}</div>`}).join('')}${tables.length?'</div>':''}`}
+
+draw();
+setInterval(()=>{if(me&&(me.role==='staff'||tab==='track'))draw()},1000);
+addEventListener('hashchange',()=>{checkTableHash();if(!me)draw()});
+</script>
+</body>
+</html>

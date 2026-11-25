@@ -1,0 +1,2252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1, user-scalable=no" />
+  <title>Nawabs · Royal Table Dining</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            gold: '#E5C158',
+            goldLight: '#FBE8A6',
+            goldDark: '#B8860B',
+            charcoal: '#07070F',
+            deepSurface: '#07070F',
+            surfaceCard: 'rgba(20, 20, 38, 0.85)',
+            surfaceBorder: 'rgba(229, 193, 88, 0.2)'
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', 'sans-serif'],
+            serif: ['"Playfair Display"', 'Georgia', 'serif']
+          }
+        }
+      }
+    };
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: dark;
+    }
+    body {
+      background-color: #07070F;
+      color: #f1f5f9;
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      padding-bottom: 95px;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .font-serif {
+      font-family: 'Playfair Display', Georgia, serif;
+    }
+    .glass-card {
+      background: rgba(18, 18, 36, 0.78);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(229, 193, 88, 0.18);
+    }
+    .glass-gold {
+      background: linear-gradient(135deg, rgba(229, 193, 88, 0.14), rgba(229, 193, 88, 0.03));
+      border: 1px solid rgba(229, 193, 88, 0.35);
+    }
+    .btn-gold {
+      background: linear-gradient(135deg, #F3D270 0%, #D4AF37 50%, #B8860B 100%);
+      color: #07070F;
+      font-weight: 800;
+      transition: all 0.2s ease;
+    }
+    .btn-gold:active {
+      transform: scale(0.97);
+    }
+    .veg-indicator {
+      width: 14px;
+      height: 14px;
+      border: 2px solid #22c55e;
+      border-radius: 3px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .veg-indicator::after {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #22c55e;
+    }
+    .nonveg-indicator {
+      width: 14px;
+      height: 14px;
+      border: 2px solid #ef4444;
+      border-radius: 3px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .nonveg-indicator::after {
+      content: '';
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #ef4444;
+    }
+    /* Pulse animations */
+    @keyframes subtlePulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.05); opacity: 0.9; }
+    }
+    .call-staff-pulse {
+      animation: subtlePulse 2.5s infinite ease-in-out;
+    }
+    /* Hide scrollbars */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+  </style>
+</head>
+<body class="selection:bg-gold selection:text-black">
+
+  <!-- Header Section -->
+  <header class="sticky top-0 z-40 bg-[#0a0a1a]/90 backdrop-blur-md border-b border-gold/15 px-4 py-3">
+    <div class="max-w-md mx-auto flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-full bg-gold/15 border border-gold/40 flex items-center justify-center text-xl shadow-lg">
+          🌿
+        </div>
+        <div>
+          <h1 class="font-serif font-bold text-lg text-gold leading-none tracking-wide">Nawabs</h1>
+          <p class="text-[11px] text-gray-400 mt-0.5">Royal Mughlai & Andhra Kitchen</p>
+        </div>
+      </div>
+      <!-- Locked Table Badge -->
+      <div id="table-badge-container" class="flex flex-col items-end cursor-pointer group" onclick="openTableSelectModal()" title="Tap to switch table or update details">
+        <div class="flex items-center gap-1.5 px-3 py-1 bg-gold/15 border border-gold/40 group-hover:border-gold rounded-full text-xs font-bold text-gold transition shadow-md">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+          <span id="header-table-id">Table T07</span>
+          <span id="header-guest-name" class="text-goldLight max-w-[100px] truncate ml-0.5">• Guest</span>
+        </div>
+        <span id="header-session-id" class="text-[9px] text-gray-400 font-mono mt-0.5">T07-SESSION-...</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main View Container -->
+  <main class="max-w-md mx-auto px-4 py-4 space-y-5">
+
+    <!-- Active Service Request Notice (If any) -->
+    <div id="active-service-alert" class="hidden">
+      <!-- Injected via JS -->
+    </div>
+
+    <!-- Active Ready Order Celebration Banner -->
+    <div id="celebration-banner" class="hidden">
+      <div class="p-4 rounded-2xl bg-gradient-to-r from-emerald-900/80 via-emerald-800/80 to-teal-900/80 border-2 border-emerald-400 shadow-2xl flex items-center gap-4 animate-bounce">
+        <div class="text-3xl">🎉</div>
+        <div>
+          <h3 class="font-bold text-emerald-100 text-sm">Your Food is Ready!</h3>
+          <p class="text-xs text-emerald-200 mt-0.5">Our steward is serving your dishes hot to your table right now. Enjoy!</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- VIEW: HOME / OVERVIEW -->
+    <section id="view-home" class="space-y-4">
+      <!-- Hero Banner -->
+      <div class="relative overflow-hidden rounded-3xl p-6 glass-card border border-gold/25 shadow-2xl">
+        <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-gold/10 rounded-full blur-2xl"></div>
+        <div class="relative z-10">
+          <div class="inline-block px-2.5 py-0.5 rounded-full bg-gold/20 text-gold text-[11px] font-semibold tracking-wider uppercase mb-2">
+            Table Dining Experience
+          </div>
+          <h2 class="font-serif text-2xl font-bold text-white leading-tight">
+            Craving Fiery Andhra Flavours?
+          </h2>
+          <p class="text-xs text-gray-300 mt-1.5 leading-relaxed">
+            Scan, customize your order, and track kitchen preparation in real time without waiting for a waiter.
+          </p>
+          <div class="mt-4 flex flex-wrap gap-2">
+            <button onclick="switchTab('menu')" class="btn-gold px-4 py-2.5 rounded-xl text-xs flex items-center gap-1.5 shadow-lg">
+              <span>Explore Menu</span>
+              <span>→</span>
+            </button>
+            <button onclick="openMenuCardsModal()" class="px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-gold/15 hover:bg-gold/25 text-gold border border-gold/40 transition flex items-center gap-1.5 shadow-md">
+              <span>📖 Menu Cards</span>
+            </button>
+            <button onclick="openCallStaffModal()" class="px-3.5 py-2.5 rounded-xl text-xs font-semibold bg-white/10 hover:bg-white/15 text-white border border-white/10 transition flex items-center gap-1.5">
+              <span>🔔 Call Staff</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Category Shortcuts -->
+      <div class="space-y-2">
+        <div class="flex items-center justify-between text-xs px-1">
+          <span class="font-bold text-gray-200">Popular Categories</span>
+          <button onclick="switchTab('menu')" class="text-gold font-medium">View All →</button>
+        </div>
+        <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
+          <button onclick="filterAndShowMenu('Biryani')" class="p-3 rounded-2xl glass-card flex flex-col items-center justify-center gap-1 text-center hover:border-gold/40 transition">
+            <span class="text-2xl">🍛</span>
+            <span class="text-[11px] font-semibold text-gray-200">Biryani</span>
+          </button>
+          <button onclick="filterAndShowMenu('Starters')" class="p-3 rounded-2xl glass-card flex flex-col items-center justify-center gap-1 text-center hover:border-gold/40 transition">
+            <span class="text-2xl">🍗</span>
+            <span class="text-[11px] font-semibold text-gray-200">Starters</span>
+          </button>
+          <button onclick="filterAndShowMenu('Main Course')" class="p-3 rounded-2xl glass-card flex flex-col items-center justify-center gap-1 text-center hover:border-gold/40 transition">
+            <span class="text-2xl">🍲</span>
+            <span class="text-[11px] font-semibold text-gray-200">Curries</span>
+          </button>
+          <button onclick="filterAndShowMenu('Tandoori')" class="p-3 rounded-2xl glass-card flex flex-col items-center justify-center gap-1 text-center hover:border-gold/40 transition">
+            <span class="text-2xl">🍢</span>
+            <span class="text-[11px] font-semibold text-gray-200">Tandoori</span>
+          </button>
+          <button onclick="filterAndShowMenu('Breads & Rice')" class="p-3 rounded-2xl glass-card flex flex-col items-center justify-center gap-1 text-center hover:border-gold/40 transition">
+            <span class="text-2xl">🫓</span>
+            <span class="text-[11px] font-semibold text-gray-200">Breads/Rice</span>
+          </button>
+          <button onclick="filterAndShowMenu('Desserts')" class="p-3 rounded-2xl glass-card flex flex-col items-center justify-center gap-1 text-center hover:border-gold/40 transition">
+            <span class="text-2xl">🍮</span>
+            <span class="text-[11px] font-semibold text-gray-200">Sweets</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Chef's Highlights -->
+      <div class="space-y-3">
+        <h3 class="font-serif font-bold text-base text-gold px-1">Royal Chef Recommendations</h3>
+        <div id="home-recommendations" class="space-y-2.5">
+          <!-- Injected via JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW: MENU -->
+    <section id="view-menu" class="hidden space-y-4">
+      <!-- Menu Header with Cards Button -->
+      <div class="flex items-center justify-between px-1">
+        <div>
+          <h2 class="font-serif font-bold text-lg text-gold leading-none">Dining Catalog</h2>
+          <p class="text-[11px] text-gray-400 mt-1">Order directly or flip printed cards</p>
+        </div>
+        <button onclick="openMenuCardsModal()" class="px-3 py-1.5 rounded-xl bg-gold/15 hover:bg-gold/25 border border-gold/40 text-gold text-xs font-bold flex items-center gap-1.5 transition shadow-sm">
+          <span>📖 View Menu Cards</span>
+        </button>
+      </div>
+
+      <!-- Search & Dietary Filters -->
+      <div class="space-y-2.5 sticky top-[68px] z-30 bg-[#0a0a1a] pt-1 pb-2">
+        <div class="relative">
+          <input 
+            type="text" 
+            id="menu-search-input" 
+            placeholder="Search Gongura Biryani, Mirchi Bajji, Pulusu..." 
+            oninput="handleSearch(this.value)"
+            class="w-full pl-9 pr-4 py-2.5 rounded-xl bg-surfaceCard/90 border border-gold/20 text-xs text-white placeholder-gray-400 focus:outline-none focus:border-gold transition"
+          />
+          <span class="absolute left-3 top-3 text-gray-400 text-xs">🔍</span>
+        </div>
+
+        <!-- Filter Category Tabs -->
+        <div id="category-tabs" class="flex gap-1.5 overflow-x-auto no-scrollbar py-1 text-xs">
+          <!-- Injected via JS: All, Biryani, Main Course, Starters, Soups, Beverages, Desserts -->
+        </div>
+
+        <!-- Veg / Non-Veg Quick Toggle -->
+        <div class="flex items-center gap-2 px-1">
+          <button onclick="setDietFilter('all')" id="diet-all-btn" class="px-3 py-1 rounded-full text-[11px] font-semibold bg-gold text-charcoal">All</button>
+          <button onclick="setDietFilter('veg')" id="diet-veg-btn" class="px-3 py-1 rounded-full text-[11px] font-semibold bg-surfaceCard text-gray-300 border border-surfaceBorder flex items-center gap-1">
+            <span class="veg-indicator"></span> Pure Veg
+          </button>
+          <button onclick="setDietFilter('nonveg')" id="diet-nonveg-btn" class="px-3 py-1 rounded-full text-[11px] font-semibold bg-surfaceCard text-gray-300 border border-surfaceBorder flex items-center gap-1">
+            <span class="nonveg-indicator"></span> Non-Veg
+          </button>
+        </div>
+      </div>
+
+      <!-- Menu Items Grid -->
+      <div id="menu-items-container" class="space-y-3">
+        <!-- Injected via JS -->
+      </div>
+    </section>
+
+    <!-- VIEW: CART -->
+    <section id="view-cart" class="hidden space-y-4">
+      <div class="flex items-center justify-between">
+        <h2 class="font-serif text-xl font-bold text-gold">Your Table Order</h2>
+        <button onclick="clearCart()" class="text-xs text-rose-400 hover:text-rose-300">Clear Cart</button>
+      </div>
+
+      <div id="cart-content-container" class="space-y-4">
+        <!-- Injected via JS -->
+      </div>
+    </section>
+
+    <!-- VIEW: ORDERS (LIVE ORDER TRACKER) -->
+    <section id="view-orders" class="hidden space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="font-serif text-xl font-bold text-gold">Live Order Status</h2>
+          <p class="text-xs text-gray-400">Real-time status updates from kitchen</p>
+        </div>
+        <button onclick="renderOrdersView()" class="px-3 py-1.5 rounded-lg bg-surfaceCard border border-gold/20 text-xs text-gold flex items-center gap-1">
+          <span>🔄</span> Refresh
+        </button>
+      </div>
+
+      <div id="orders-list-container" class="space-y-4">
+        <!-- Injected via JS -->
+      </div>
+    </section>
+
+    <!-- VIEW: FUN (WI-FI & GAMES) -->
+    <section id="view-fun" class="hidden space-y-4">
+      <div class="p-5 rounded-3xl glass-gold border border-gold/40 shadow-xl space-y-3">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-2xl">📶</span>
+            <div>
+              <h3 class="font-serif font-bold text-base text-gold">Free Dining Wi-Fi</h3>
+              <p class="text-[11px] text-gray-300">Fast high-speed guest network</p>
+            </div>
+          </div>
+          <span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold border border-emerald-500/30">Active</span>
+        </div>
+
+        <div class="bg-black/30 p-3 rounded-2xl space-y-2 border border-white/5">
+          <div class="flex justify-between items-center text-xs">
+            <span class="text-gray-400">Network Name:</span>
+            <span id="wifi-ssid-display" class="font-semibold text-white">Nawabs_Dining_5G</span>
+          </div>
+          <div class="flex justify-between items-center text-xs">
+            <span class="text-gray-400">Password:</span>
+            <div class="flex items-center gap-2">
+              <span id="wifi-password-display" class="font-mono text-gold font-bold">••••••••••••</span>
+              <button onclick="toggleWifiPassword()" class="text-xs text-gray-400 hover:text-white" title="Toggle visibility">👁️</button>
+            </div>
+          </div>
+        </div>
+
+        <button onclick="copyWifiPassword()" class="w-full py-2 rounded-xl bg-gold/20 hover:bg-gold/30 text-gold border border-gold/30 text-xs font-semibold flex items-center justify-center gap-1.5 transition">
+          <span>📋</span> Copy Wi-Fi Password
+        </button>
+      </div>
+
+      <!-- Post-Order Unlock Notice -->
+      <div id="games-lock-banner" class="hidden p-3 rounded-2xl bg-amber-950/40 border border-amber-500/30 text-amber-200 text-xs flex items-center gap-2">
+        <span>🔒</span>
+        <span>Table games unlock after placing an order. Place an order to challenge the Chef Bot!</span>
+      </div>
+
+      <!-- 👥 Multi-Diner Lounge: Invite Friends via QR (Requirement 6) -->
+      <div class="glass-card p-4 rounded-3xl space-y-3 border border-gold/30 shadow-xl bg-gradient-to-br from-indigo-950/40 via-surfaceCard to-black/60">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2.5">
+            <span class="text-2xl p-2 rounded-xl bg-gold/15 text-gold border border-gold/30">👥</span>
+            <div>
+              <h4 class="font-serif font-bold text-sm text-gold">Invite Friends at Table to Play</h4>
+              <p class="text-[11px] text-gray-300">Scan QR or share link to play together on your phones!</p>
+            </div>
+          </div>
+          <span class="px-2 py-0.5 rounded-full bg-gold/20 text-gold text-[10px] font-bold border border-gold/30">Multiplayer</span>
+        </div>
+
+        <div class="flex flex-col sm:flex-row items-center gap-4 bg-black/40 p-3.5 rounded-2xl border border-white/5">
+          <div class="bg-white p-2 rounded-xl shadow-md shrink-0 text-center">
+            <img id="game-invite-qr-img" src="" alt="Table QR" class="w-24 h-24 sm:w-28 sm:h-28 object-contain mx-auto" />
+            <span class="text-[9px] text-black font-mono font-bold block mt-1">Scan with phone</span>
+          </div>
+          <div class="space-y-2 text-xs flex-1 text-center sm:text-left">
+            <p class="text-gray-300 font-medium">Friends sitting at <strong id="invite-table-label" class="text-gold font-bold">Table T07</strong> can scan this QR code or tap below to open the games lounge!</p>
+            <div class="flex flex-wrap gap-2 justify-center sm:justify-start">
+              <button onclick="copyGameInviteLink()" class="px-3 py-1.5 rounded-xl bg-gold/20 hover:bg-gold/30 text-gold border border-gold/40 text-[11px] font-bold flex items-center gap-1 transition">
+                <span>📋</span> Copy Invite Link
+              </button>
+              <button onclick="shareGameWithFriends()" class="px-3 py-1.5 rounded-xl bg-surfaceCard hover:bg-white/10 text-white border border-white/20 text-[11px] font-bold flex items-center gap-1 transition">
+                <span>📲</span> Share Game
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2-Player Pass & Play Mode Toggle -->
+        <div class="flex items-center justify-between p-2.5 rounded-xl bg-white/5 text-xs">
+          <span class="text-gray-300 font-semibold">Tic-Tac-Toe Game Mode:</span>
+          <div class="flex gap-1.5 text-[11px]">
+            <button onclick="setTTTMode('bot')" id="ttt-mode-bot" class="px-2.5 py-1 rounded-lg bg-gold text-charcoal font-bold transition">Vs Bot</button>
+            <button onclick="setTTTMode('pvp')" id="ttt-mode-pvp" class="px-2.5 py-1 rounded-lg bg-surfaceCard text-gray-400 border border-white/10 transition">2 Players</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Interactive Games Container -->
+      <div id="games-section" class="space-y-4">
+        <!-- Game Selector Tabs -->
+        <div class="grid grid-cols-4 gap-1.5 text-xs">
+          <button onclick="switchGame('ttt')" id="game-tab-ttt" class="p-2 rounded-xl bg-gold text-charcoal font-bold text-center">Tic-Tac-Toe</button>
+          <button onclick="switchGame('memory')" id="game-tab-memory" class="p-2 rounded-xl bg-surfaceCard text-gray-300 border border-surfaceBorder text-center">Memory</button>
+          <button onclick="switchGame('rps')" id="game-tab-rps" class="p-2 rounded-xl bg-surfaceCard text-gray-300 border border-surfaceBorder text-center">RPS Bot</button>
+          <button onclick="switchGame('trivia')" id="game-tab-trivia" class="p-2 rounded-xl bg-surfaceCard text-gray-300 border border-surfaceBorder text-center">Nawabs Quiz</button>
+        </div>
+
+        <!-- 1. TIC TAC TOE -->
+        <div id="game-ttt-container" class="glass-card p-4 rounded-3xl space-y-3 border border-gold/25">
+          <div class="flex items-center justify-between">
+            <h4 class="font-serif font-bold text-sm text-gold">🎮 Tic-Tac-Toe (Vs Chef Bot)</h4>
+            <span id="ttt-status-msg" class="text-xs font-semibold text-gray-300">Your Turn (X)</span>
+          </div>
+          <div class="grid grid-cols-3 gap-2 max-w-[240px] mx-auto py-2">
+            <button onclick="playTTT(0)" id="ttt-c0" class="w-full aspect-square rounded-2xl bg-black/40 border border-gold/20 text-2xl font-bold flex items-center justify-center hover:bg-gold/10 transition"></button>
+            <button onclick="playTTT(1)" id="ttt-c1" class="w-full aspect-square rounded-2xl bg-black/40 border border-gold/20 text-2xl font-bold flex items-center justify-center hover:bg-gold/10 transition"></button>
+            <button onclick="playTTT(2)" id="ttt-c2" class="w-full aspect-square rounded-2xl bg-black/40 border border-gold/20 text-2xl font-bold flex items-center justify-center hover:bg-gold/10 transition"></button>
+            <button onclick="playTTT(3)" id="ttt-c3" class="w-full aspect-square rounded-2xl bg-black/40 border border-gold/20 text-2xl font-bold flex items-center justify-center hover:bg-gold/10 transition"></button>
+            <button onclick="playTTT(4)" id="ttt-c4" class="w-full aspect-square rounded-2xl bg-black/40 border border-gold/20 text-2xl font-bold flex items-center justify-center hover:bg-gold/10 transition"></button>
+            <button onclick="playTTT(5)" id="ttt-c5" class="w-full aspect-square rounded-2xl bg-black/40 border border-gold/20 text-2xl font-bold flex items-center justify-center hover:bg-gold/10 transition"></button>
+            <button onclick="playTTT(6)" id="ttt-c6" class="w-full aspect-square rounded-2xl bg-black/40 border border-gold/20 text-2xl font-bold flex items-center justify-center hover:bg-gold/10 transition"></button>
+            <button onclick="playTTT(7)" id="ttt-c7" class="w-full aspect-square rounded-2xl bg-black/40 border border-gold/20 text-2xl font-bold flex items-center justify-center hover:bg-gold/10 transition"></button>
+            <button onclick="playTTT(8)" id="ttt-c8" class="w-full aspect-square rounded-2xl bg-black/40 border border-gold/20 text-2xl font-bold flex items-center justify-center hover:bg-gold/10 transition"></button>
+          </div>
+          <button onclick="resetTTT()" class="w-full py-2 rounded-xl bg-white/10 hover:bg-white/15 text-xs text-white">Restart Game</button>
+        </div>
+
+        <!-- 2. MEMORY MATCH -->
+        <div id="game-memory-container" class="hidden glass-card p-4 rounded-3xl space-y-3 border border-gold/25">
+          <div class="flex items-center justify-between text-xs">
+            <h4 class="font-serif font-bold text-sm text-gold">🧠 Food Emoji Match</h4>
+            <div class="flex gap-3 text-gray-300">
+              <span>Moves: <b id="mem-moves" class="text-gold">0</b></span>
+              <span>Matched: <b id="mem-matches" class="text-emerald-400">0/6</b></span>
+            </div>
+          </div>
+          <div id="memory-grid" class="grid grid-cols-4 gap-2 max-w-[280px] mx-auto py-2">
+            <!-- Injected via JS -->
+          </div>
+          <button onclick="initMemoryGame()" class="w-full py-2 rounded-xl bg-white/10 hover:bg-white/15 text-xs text-white">Reset Cards</button>
+        </div>
+
+        <!-- 3. ROCK PAPER SCISSORS -->
+        <div id="game-rps-container" class="hidden glass-card p-4 rounded-3xl space-y-3 border border-gold/25 text-center">
+          <h4 class="font-serif font-bold text-sm text-gold">✊ Rock Paper Scissors</h4>
+          <p class="text-xs text-gray-400">Play against Chef Somanna to win a complimentary dessert recommendation!</p>
+          <div class="flex justify-around items-center py-4 bg-black/30 rounded-2xl">
+            <div>
+              <p class="text-[11px] text-gray-400 mb-1">You</p>
+              <div id="rps-user-choice" class="text-4xl">❔</div>
+            </div>
+            <div class="text-xl font-bold text-gold">VS</div>
+            <div>
+              <p class="text-[11px] text-gray-400 mb-1">Chef Bot</p>
+              <div id="rps-bot-choice" class="text-4xl">👨‍🍳</div>
+            </div>
+          </div>
+          <p id="rps-result-text" class="text-sm font-bold text-white min-h-[24px]">Make your choice below:</p>
+          <div class="grid grid-cols-3 gap-2">
+            <button onclick="playRPS('rock')" class="py-3 rounded-2xl bg-surfaceCard hover:bg-gold/20 border border-gold/30 text-2xl">✊<br><span class="text-[10px] font-sans">Rock</span></button>
+            <button onclick="playRPS('paper')" class="py-3 rounded-2xl bg-surfaceCard hover:bg-gold/20 border border-gold/30 text-2xl">✋<br><span class="text-[10px] font-sans">Paper</span></button>
+            <button onclick="playRPS('scissors')" class="py-3 rounded-2xl bg-surfaceCard hover:bg-gold/20 border border-gold/30 text-2xl">✌️<br><span class="text-[10px] font-sans">Scissors</span></button>
+          </div>
+        </div>
+
+        <!-- 4. ANDHRA FOOD TRIVIA -->
+        <div id="game-trivia-container" class="hidden glass-card p-4 rounded-3xl space-y-3 border border-gold/25">
+          <div class="flex items-center justify-between text-xs">
+            <h4 class="font-serif font-bold text-sm text-gold">🌶️ Andhra Food Trivia</h4>
+            <span class="text-gray-300">Score: <b id="trivia-score" class="text-gold">0/5</b></span>
+          </div>
+          <div id="trivia-card" class="bg-black/30 p-4 rounded-2xl space-y-3 border border-white/5">
+            <!-- Injected via JS -->
+          </div>
+          <button onclick="nextTriviaQuestion()" id="trivia-next-btn" class="w-full py-2 rounded-xl btn-gold text-xs font-semibold hidden">Next Question →</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Persistent Floating Call Staff Button -->
+  <div class="fixed right-4 bottom-24 z-40">
+    <button 
+      onclick="openCallStaffModal()" 
+      class="call-staff-pulse flex items-center gap-2 px-4 py-3 rounded-full bg-gradient-to-r from-gold to-yellow-500 text-charcoal font-bold text-xs shadow-2xl hover:brightness-110 active:scale-95 transition"
+    >
+      <span class="text-base">🔔</span>
+      <span>Call Staff</span>
+    </button>
+  </div>
+
+  <!-- Floating Quick Cart Bar (visible when items are in cart) -->
+  <div id="floating-cart-bar" class="hidden fixed bottom-20 inset-x-4 max-w-md mx-auto z-40">
+    <div onclick="switchTab('cart')" class="p-3.5 px-4 rounded-2xl bg-gradient-to-r from-gold via-amber-400 to-goldDark text-charcoal font-black flex items-center justify-between shadow-2xl cursor-pointer active:scale-95 transition duration-200 border border-goldLight">
+      <div class="flex items-center gap-2.5">
+        <span class="w-7 h-7 rounded-full bg-black/20 flex items-center justify-center text-xs font-black" id="floating-cart-count">0</span>
+        <span class="text-xs font-black tracking-tight" id="floating-cart-subtotal">₹0</span>
+      </div>
+      <div class="flex items-center gap-1.5 text-xs font-black">
+        <span>View Cart</span>
+        <span class="text-sm">→</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom Navigation Bar -->
+  <nav class="fixed bottom-0 inset-x-0 z-40 bg-[#0a0a1a]/95 backdrop-blur-lg border-t border-gold/20 px-4 py-2">
+    <div class="max-w-md mx-auto grid grid-cols-5 gap-1">
+      <button onclick="switchTab('home')" id="nav-btn-home" class="flex flex-col items-center justify-center py-1.5 text-gold transition">
+        <span class="text-lg">🏠</span>
+        <span class="text-[10px] font-medium mt-0.5">Home</span>
+      </button>
+      <button onclick="switchTab('menu')" id="nav-btn-menu" class="flex flex-col items-center justify-center py-1.5 text-gray-400 hover:text-gold transition">
+        <span class="text-lg">🍽️</span>
+        <span class="text-[10px] font-medium mt-0.5">Menu</span>
+      </button>
+      <button onclick="switchTab('cart')" id="nav-btn-cart" class="relative flex flex-col items-center justify-center py-1.5 text-gray-400 hover:text-gold transition">
+        <span class="text-lg">🛒</span>
+        <span class="text-[10px] font-medium mt-0.5">Cart</span>
+        <span id="cart-nav-badge" class="hidden absolute top-0.5 right-4 w-4 h-4 bg-rose-500 text-white rounded-full text-[9px] font-bold flex items-center justify-center">0</span>
+      </button>
+      <button onclick="switchTab('orders')" id="nav-btn-orders" class="relative flex flex-col items-center justify-center py-1.5 text-gray-400 hover:text-gold transition">
+        <span class="text-lg">📋</span>
+        <span class="text-[10px] font-medium mt-0.5">Orders</span>
+        <span id="orders-nav-dot" class="hidden absolute top-1 right-5 w-2 h-2 bg-emerald-400 rounded-full animate-ping"></span>
+      </button>
+      <button onclick="switchTab('fun')" id="nav-btn-fun" class="flex flex-col items-center justify-center py-1.5 text-gray-400 hover:text-gold transition">
+        <span class="text-lg">🎮</span>
+        <span class="text-[10px] font-medium mt-0.5">Fun</span>
+      </button>
+    </div>
+  </nav>
+
+  <!-- Modal: Official Menu Cards Viewer -->
+  <div id="cards-modal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-2 sm:p-4">
+    <div class="relative w-full max-w-3xl bg-surfaceCard border border-gold/30 rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[92vh]">
+      <!-- Header -->
+      <div class="p-3.5 border-b border-white/10 flex items-center justify-between bg-black/40">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">📖</span>
+          <div>
+            <h3 id="card-modal-title" class="font-serif font-bold text-sm text-gold leading-tight">Nawabs Menu Card</h3>
+            <p id="card-modal-subtitle" class="text-[10px] text-gray-400">Card 1 of 6</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="toggleCardZoom()" class="p-1.5 px-2.5 rounded-xl bg-white/5 hover:bg-white/15 text-gray-300 text-[11px] border border-white/10 transition">
+            🔍 Zoom
+          </button>
+          <button onclick="closeMenuCardsModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-gray-300 hover:text-white flex items-center justify-center text-sm font-bold transition">
+            ✕
+          </button>
+        </div>
+      </div>
+
+      <!-- Tab bar for cards -->
+      <div id="cards-tab-bar" class="flex gap-1.5 overflow-x-auto p-2 bg-black/20 border-b border-white/5 text-xs no-scrollbar">
+        <!-- Injected via JS -->
+      </div>
+
+      <!-- Card display with navigation -->
+      <div class="flex-1 overflow-auto p-3 flex items-center justify-center bg-black/60 relative min-h-[50vh]">
+        <button onclick="prevCard()" class="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/75 hover:bg-gold hover:text-charcoal border border-gold/40 text-gold flex items-center justify-center text-lg font-bold shadow-xl transition z-10">
+          ‹
+        </button>
+        <div id="card-img-wrapper" class="transition-transform duration-200 origin-center max-w-full">
+          <img id="card-img" src="" alt="Menu Card Sheet" class="max-h-[62vh] rounded-xl shadow-2xl border border-gold/30 object-contain mx-auto" />
+        </div>
+        <button onclick="nextCard()" class="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/75 hover:bg-gold hover:text-charcoal border border-gold/40 text-gold flex items-center justify-center text-lg font-bold shadow-xl transition z-10">
+          ›
+        </button>
+      </div>
+
+      <!-- Footer -->
+      <div class="p-3 bg-black/40 border-t border-white/10 flex items-center justify-between">
+        <span id="card-counter" class="text-xs text-gray-400 font-mono">1 / 6</span>
+        <button onclick="orderFromCurrentCard()" class="btn-gold px-4 py-2 rounded-xl text-xs font-bold shadow-md flex items-center gap-1.5">
+          <span>Order From This Page</span>
+          <span>→</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Call Staff Quick Options -->
+  <div id="call-staff-modal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-end sm:items-center justify-center p-4">
+    <div class="w-full max-w-sm rounded-3xl glass-card border border-gold/30 p-5 space-y-4 animate-in fade-in slide-in-from-bottom duration-200">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span class="text-xl">🔔</span>
+          <h3 class="font-serif font-bold text-base text-gold">Call Table Service</h3>
+        </div>
+        <button onclick="closeCallStaffModal()" class="text-gray-400 hover:text-white text-lg">✕</button>
+      </div>
+      <p class="text-xs text-gray-300">Tap your requirement for instant dispatch to reception:</p>
+      
+      <div class="grid grid-cols-2 gap-2 text-xs">
+        <button onclick="submitServiceCall('Need Plates', '🍽️')" class="p-3 rounded-2xl bg-surfaceCard hover:border-gold/50 border border-white/5 flex items-center gap-2.5 transition">
+          <span class="text-xl">🍽️</span>
+          <span class="font-medium text-left">Need Plates</span>
+        </button>
+        <button onclick="submitServiceCall('Need Cutlery', '🥄')" class="p-3 rounded-2xl bg-surfaceCard hover:border-gold/50 border border-white/5 flex items-center gap-2.5 transition">
+          <span class="text-xl">🥄</span>
+          <span class="font-medium text-left">Need Cutlery</span>
+        </button>
+        <button onclick="submitServiceCall('Need Water', '💧')" class="p-3 rounded-2xl bg-surfaceCard hover:border-gold/50 border border-white/5 flex items-center gap-2.5 transition">
+          <span class="text-xl">💧</span>
+          <span class="font-medium text-left">Need Water</span>
+        </button>
+        <button onclick="submitServiceCall('Need Tissues', '🧻')" class="p-3 rounded-2xl bg-surfaceCard hover:border-gold/50 border border-white/5 flex items-center gap-2.5 transition">
+          <span class="text-xl">🧻</span>
+          <span class="font-medium text-left">Need Tissues</span>
+        </button>
+        <button onclick="submitServiceCall('Request Bill', '💳')" class="p-3 rounded-2xl bg-surfaceCard hover:border-gold/50 border border-white/5 flex items-center gap-2.5 transition">
+          <span class="text-xl">💳</span>
+          <span class="font-medium text-left">Request Bill</span>
+        </button>
+        <button onclick="submitServiceCall('Need Assistance', '🧑‍🍳')" class="p-3 rounded-2xl bg-surfaceCard hover:border-gold/50 border border-white/5 flex items-center gap-2.5 transition">
+          <span class="text-xl">🧑‍🍳</span>
+          <span class="font-medium text-left">Need Assistance</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Manual Table & Guest Check-In Selector -->
+  <div id="table-select-modal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-4">
+    <div class="w-full max-w-sm rounded-3xl glass-card border border-gold/40 p-5 space-y-4 text-center shadow-2xl">
+      <div class="w-12 h-12 rounded-2xl bg-gold/15 border border-gold/40 flex items-center justify-center text-2xl mx-auto">
+        🍽️
+      </div>
+      <div>
+        <h3 class="font-serif font-bold text-lg text-gold">Table Dining Check-In</h3>
+        <p class="text-xs text-gray-300 mt-1">
+          Welcome! Enter your name and select your table to start ordering:
+        </p>
+      </div>
+
+      <!-- Guest Name Input -->
+      <div class="text-left space-y-1">
+        <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block">👤 Guest / Party Name</label>
+        <input 
+          type="text" 
+          id="modal-guest-name-input" 
+          placeholder="e.g., Ananya Rao / Vikram & Friends" 
+          class="w-full px-3.5 py-2.5 rounded-xl bg-black/50 border border-gold/30 text-white text-xs placeholder-gray-500 focus:outline-none focus:border-gold transition shadow-inner font-medium"
+        />
+      </div>
+
+      <!-- Occupancy Alert Warning -->
+      <div id="modal-table-occupied-alert" class="hidden text-left p-2.5 rounded-xl bg-amber-500/15 border border-amber-500/30 text-[11px] text-amber-200">
+        <!-- Dynamically populated -->
+      </div>
+
+      <!-- Table Selection Grid -->
+      <div class="space-y-1.5 text-left">
+        <div class="flex items-center justify-between text-[11px] text-gray-400 font-medium">
+          <span>Choose Table (T01 - T20):</span>
+          <div class="flex items-center gap-2">
+            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-emerald-400"></span>Free</span>
+            <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-400"></span>Occupied</span>
+          </div>
+        </div>
+        <div class="grid grid-cols-5 gap-1.5 py-1 max-h-44 overflow-y-auto no-scrollbar" id="modal-table-chips-grid">
+          <!-- Injected via renderModalTableGrid() -->
+        </div>
+      </div>
+
+      <!-- Modal Actions -->
+      <div class="flex items-center gap-2 pt-2">
+        <button onclick="window.location.href='index.html'" class="flex-1 py-2.5 rounded-xl bg-surfaceCard hover:bg-white/10 text-gray-300 border border-white/10 text-xs font-bold transition">
+          ← Back to Home
+        </button>
+        <button onclick="confirmTableCheckin()" class="btn-gold flex-1 py-2.5 rounded-xl text-xs font-black shadow-lg">
+          Confirm & Dine
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Customer Settle Bill & Dining Feedback -->
+  <div id="customer-bill-modal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-3 sm:p-4 overflow-y-auto">
+    <div class="w-full max-w-md rounded-3xl glass-card border border-gold/40 p-5 space-y-4 text-left shadow-2xl my-auto max-h-[92vh] overflow-y-auto no-scrollbar">
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between border-b border-gold/20 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-2xl bg-gold/15 border border-gold/40 flex items-center justify-center text-xl">
+            👑
+          </div>
+          <div>
+            <h3 class="font-serif font-bold text-base text-gold">Nawabs Dining Bill</h3>
+            <p id="bill-modal-table-label" class="text-[11px] text-gray-400">Table T07 • Settle & Feedback</p>
+          </div>
+        </div>
+        <button onclick="closeCustomerBillModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-gray-300 hover:text-white flex items-center justify-center text-xs font-bold transition">
+          ✕
+        </button>
+      </div>
+
+      <!-- Combined Bill Itemized Summary -->
+      <div class="space-y-2">
+        <div class="flex items-center justify-between text-xs text-gray-300 font-bold">
+          <span>Consolidated Dishes:</span>
+          <span id="bill-modal-item-count" class="text-[11px] text-gold font-normal">All Rounds Combined</span>
+        </div>
+        <div id="bill-modal-items-list" class="space-y-1.5 p-3 rounded-2xl bg-black/40 border border-white/5 max-h-44 overflow-y-auto text-xs no-scrollbar">
+          <!-- Injected via renderCustomerBillModal() -->
+        </div>
+        
+        <!-- Totals breakdown -->
+        <div class="p-3 rounded-2xl bg-gold/10 border border-gold/25 space-y-1 text-xs">
+          <div class="flex justify-between text-gray-300">
+            <span>Subtotal:</span>
+            <span id="bill-modal-subtotal" class="font-mono">₹0</span>
+          </div>
+          <div class="flex justify-between text-gray-300">
+            <span>Restaurant GST (5%):</span>
+            <span id="bill-modal-tax" class="font-mono">₹0</span>
+          </div>
+          <div class="border-t border-gold/20 pt-1.5 flex justify-between items-center text-sm font-bold text-white">
+            <span class="text-gold">Grand Total Due:</span>
+            <span id="bill-modal-total" class="text-gold text-base font-mono font-black">₹0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment Method Selection -->
+      <div class="space-y-2">
+        <label class="text-xs font-bold text-gray-300 flex items-center gap-1.5">
+          <span>💳</span> Select Payment Method:
+        </label>
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <button type="button" onclick="selectPaymentMethod('UPI')" id="pay-opt-UPI" class="p-2.5 rounded-xl border border-gold bg-gold/20 text-gold font-bold flex items-center gap-2 transition">
+            <span>📱</span> <span>UPI / QR</span>
+          </button>
+          <button type="button" onclick="selectPaymentMethod('Card')" id="pay-opt-Card" class="p-2.5 rounded-xl border border-white/10 bg-surfaceCard text-gray-300 hover:border-gold/40 flex items-center gap-2 transition">
+            <span>💳</span> <span>Card at Table</span>
+          </button>
+          <button type="button" onclick="selectPaymentMethod('Cash')" id="pay-opt-Cash" class="p-2.5 rounded-xl border border-white/10 bg-surfaceCard text-gray-300 hover:border-gold/40 flex items-center gap-2 transition">
+            <span>💵</span> <span>Cash at Table</span>
+          </button>
+          <button type="button" onclick="selectPaymentMethod('Reception')" id="pay-opt-Reception" class="p-2.5 rounded-xl border border-white/10 bg-surfaceCard text-gray-300 hover:border-gold/40 flex items-center gap-2 transition">
+            <span>🛎️</span> <span>Pay at Counter</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Guest Dining Feedback (Requirement 4) -->
+      <div class="space-y-2.5 p-3.5 rounded-2xl bg-black/40 border border-gold/20">
+        <div class="flex items-center justify-between">
+          <label class="text-xs font-bold text-gold flex items-center gap-1.5">
+            <span>⭐</span> Rate Your Nawabs Experience:
+          </label>
+          <span id="feedback-rating-label" class="text-[11px] font-bold text-amber-300">5.0 Excellent</span>
+        </div>
+
+        <!-- Star Rating -->
+        <div class="flex items-center justify-center gap-2 py-1" id="star-rating-container">
+          <button type="button" onclick="setFeedbackRating(1)" class="text-2xl text-amber-400 hover:scale-110 transition star-btn" data-star="1">★</button>
+          <button type="button" onclick="setFeedbackRating(2)" class="text-2xl text-amber-400 hover:scale-110 transition star-btn" data-star="2">★</button>
+          <button type="button" onclick="setFeedbackRating(3)" class="text-2xl text-amber-400 hover:scale-110 transition star-btn" data-star="3">★</button>
+          <button type="button" onclick="setFeedbackRating(4)" class="text-2xl text-amber-400 hover:scale-110 transition star-btn" data-star="4">★</button>
+          <button type="button" onclick="setFeedbackRating(5)" class="text-2xl text-amber-400 hover:scale-110 transition star-btn" data-star="5">★</button>
+        </div>
+
+        <!-- Compliment Tags -->
+        <div class="space-y-1">
+          <span class="text-[10px] text-gray-400 block">What did you enjoy most? (Tap tags):</span>
+          <div class="flex flex-wrap gap-1.5" id="feedback-tags-container">
+            <button type="button" onclick="toggleFeedbackTag('Authentic Taste', this)" class="px-2.5 py-1 rounded-lg text-[10px] bg-white/5 hover:bg-gold/20 text-gray-300 border border-white/10 font-medium transition tag-btn">🌶️ Authentic Taste</button>
+            <button type="button" onclick="toggleFeedbackTag('Fast Service', this)" class="px-2.5 py-1 rounded-lg text-[10px] bg-white/5 hover:bg-gold/20 text-gray-300 border border-white/10 font-medium transition tag-btn">⚡ Fast Service</button>
+            <button type="button" onclick="toggleFeedbackTag('Hot & Fresh', this)" class="px-2.5 py-1 rounded-lg text-[10px] bg-white/5 hover:bg-gold/20 text-gray-300 border border-white/10 font-medium transition tag-btn">🍲 Hot & Fresh</button>
+            <button type="button" onclick="toggleFeedbackTag('Polite Staff', this)" class="px-2.5 py-1 rounded-lg text-[10px] bg-white/5 hover:bg-gold/20 text-gray-300 border border-white/10 font-medium transition tag-btn">👨‍🍳 Polite Staff</button>
+            <button type="button" onclick="toggleFeedbackTag('Royal Ambience', this)" class="px-2.5 py-1 rounded-lg text-[10px] bg-white/5 hover:bg-gold/20 text-gray-300 border border-white/10 font-medium transition tag-btn">👑 Royal Ambience</button>
+          </div>
+        </div>
+
+        <!-- Optional Suggestions / Notes -->
+        <textarea 
+          id="customer-feedback-comment" 
+          rows="2" 
+          placeholder="Optional: Share any comments or compliments for our chefs..."
+          class="w-full px-3 py-2 rounded-xl bg-black/50 border border-white/10 text-xs text-white placeholder-gray-500 focus:outline-none focus:border-gold resize-none"
+        ></textarea>
+      </div>
+
+      <!-- Action Button -->
+      <div class="pt-1 flex gap-2">
+        <button type="button" onclick="closeCustomerBillModal()" class="flex-1 py-3 rounded-2xl bg-surfaceCard text-gray-300 text-xs font-bold border border-white/10 hover:bg-white/10 transition">
+          Back
+        </button>
+        <button type="button" onclick="submitCustomerBillAndFeedback()" class="flex-2 w-full btn-gold py-3 rounded-2xl text-xs font-black shadow-xl flex items-center justify-center gap-1.5 transition">
+          <span>✓ Submit Feedback & Request Bill</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Shared Scripts -->
+  <script src="shared.js"></script>
+
+  <!-- Customer App Logic -->
+  <script>
+    // State variables
+    let currentTableId = 'T07'; // default
+    let currentGuestName = '';
+    let sessionToken = '';
+    let currentTab = 'home';
+    let currentCategory = 'All';
+    let currentDietFilter = 'all'; // all, veg, nonveg
+    let searchQuery = '';
+    let cart = {}; // { itemId: qty }
+    let showWifiPw = false;
+    let modalSelectedTable = 'T07';
+
+    // Detect Table & Guest with Strict Occupancy Protection
+    function initTableIdentification() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const hash = window.location.hash;
+
+      let detectedTable = urlParams.get('table') || urlParams.get('t');
+
+      if (!detectedTable && hash) {
+        const match = hash.match(/table=?(T\d+|\d+)/i) || hash.match(/#(T\d+)/i);
+        if (match) detectedTable = match[1];
+      }
+
+      const pathMatch = window.location.pathname.match(/\/table\/(T\d+|\d+)/i);
+      if (pathMatch) detectedTable = pathMatch[1];
+
+      if (detectedTable) {
+        if (!detectedTable.toUpperCase().startsWith('T')) {
+          detectedTable = 'T' + String(detectedTable).padStart(2, '0');
+        }
+        currentTableId = detectedTable.toUpperCase();
+      } else {
+        const saved = sessionStorage.getItem('CURRENT_TABLE_ID');
+        if (saved) {
+          currentTableId = saved;
+        }
+      }
+
+      // Check if currentTableId is occupied by someone else
+      const tableDetails = GunturDB.getTableDetails(currentTableId);
+      const savedToken = sessionStorage.getItem('CURRENT_SESSION_TOKEN');
+      const isMyTable = (tableDetails.isOccupied && tableDetails.sessionToken && savedToken === tableDetails.sessionToken);
+
+      if (tableDetails.isOccupied && !isMyTable) {
+        // Table is occupied by someone else! Prevent taking it and find first free table
+        for (let i = 1; i <= 20; i++) {
+          const testTid = 'T' + String(i).padStart(2, '0');
+          if (!GunturDB.isTableOccupied(testTid)) {
+            currentTableId = testTid;
+            break;
+          }
+        }
+        currentGuestName = '';
+        sessionStorage.removeItem('CURRENT_GUEST_NAME');
+        sessionStorage.removeItem('CURRENT_SESSION_TOKEN');
+        GunturUtils.toast(`Table ${detectedTable || 'selected'} is occupied. Please select an available table.`, 'error', 5000);
+      } else if (isMyTable) {
+        currentGuestName = tableDetails.guestName || sessionStorage.getItem('CURRENT_GUEST_NAME') || '';
+        sessionToken = tableDetails.sessionToken;
+      }
+
+      let guestParam = urlParams.get('guest');
+      if (guestParam && !tableDetails.isOccupied) {
+        currentGuestName = guestParam.trim();
+      }
+
+      // If user has a valid active session already, finalize directly
+      if (isMyTable && currentGuestName) {
+        finalizeCheckin();
+      } else {
+        openTableSelectModal();
+      }
+    }
+
+    // Called after guest confirms via the check-in modal
+    function finalizeCheckin() {
+      sessionStorage.setItem('CURRENT_TABLE_ID', currentTableId);
+      sessionStorage.setItem('CURRENT_GUEST_NAME', currentGuestName);
+
+      const sess = GunturDB.registerTableSession(currentTableId, currentGuestName || 'Guest');
+      sessionToken = sess.token;
+      sessionStorage.setItem('CURRENT_SESSION_TOKEN', sessionToken);
+
+      // Update UI Header & Games QR
+      updateHeaderBadges();
+      updateGameInviteCard();
+
+      // Load saved cart for this table
+      const savedCart = localStorage.getItem(`CART_${currentTableId}`);
+      if (savedCart) {
+        try { cart = JSON.parse(savedCart); } catch (e) { cart = {}; }
+      }
+
+      const urlParams = new URLSearchParams(window.location.search);
+      const catParam = urlParams.get('category');
+      if (catParam) {
+        currentCategory = catParam;
+        switchTab('menu');
+      }
+      if (urlParams.get('tab') === 'fun') {
+        switchTab('fun');
+      }
+    }
+
+    function updateHeaderBadges() {
+      const hTable = document.getElementById('header-table-id');
+      const hGuest = document.getElementById('header-guest-name');
+      const hSess = document.getElementById('header-session-id');
+
+      if (hTable) hTable.textContent = `Table ${currentTableId}`;
+      if (hGuest) {
+        hGuest.textContent = currentGuestName ? `• ${currentGuestName}` : '';
+        hGuest.title = currentGuestName;
+      }
+      if (hSess) hSess.textContent = sessionToken || `${currentTableId}-SESSION`;
+    }
+
+    function openTableSelectModal() {
+      modalSelectedTable = currentTableId;
+      const modal = document.getElementById('table-select-modal');
+      const input = document.getElementById('modal-guest-name-input');
+      if (input) input.value = currentGuestName || '';
+      renderModalTableGrid();
+      if (modal) modal.classList.remove('hidden');
+    }
+
+    function closeTableSelectModal() {
+      const modal = document.getElementById('table-select-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function renderModalTableGrid() {
+      const grid = document.getElementById('modal-table-chips-grid');
+      if (!grid) return;
+      let html = '';
+      const savedToken = sessionStorage.getItem('CURRENT_SESSION_TOKEN');
+
+      for (let i = 1; i <= 20; i++) {
+        const tid = 'T' + String(i).padStart(2, '0');
+        const details = GunturDB.getTableDetails(tid);
+        const isOcc = details.isOccupied;
+        const isMyTable = isOcc && details.sessionToken && savedToken === details.sessionToken;
+        const isSel = tid === modalSelectedTable;
+
+        let btnClass = 'p-2 rounded-xl text-xs font-bold border transition flex flex-col items-center justify-center relative ';
+        if (isOcc && !isMyTable) {
+          btnClass += 'bg-rose-950/20 border-rose-500/30 text-rose-300 opacity-60 hover:opacity-80 cursor-not-allowed';
+        } else if (isSel) {
+          btnClass += 'border-gold bg-gold/20 text-gold shadow-md ring-1 ring-gold';
+        } else if (isMyTable) {
+          btnClass += 'bg-amber-500/15 border-amber-500/30 text-amber-300 hover:border-amber-400';
+        } else {
+          btnClass += 'bg-surfaceCard border-white/10 text-gray-300 hover:border-gold/40 hover:text-white cursor-pointer';
+        }
+
+        html += `
+          <button 
+            type="button"
+            onclick="selectModalTable('${tid}')" 
+            class="${btnClass}"
+            title="${isOcc && !isMyTable ? `Table ${tid} is Occupied by ${details.guestName} - Unavailable` : (isMyTable ? `Your Active Table ${tid}` : `Table ${tid} Available`)}"
+          >
+            <span class="font-mono font-bold">${tid}</span>
+            <span class="text-[8px] font-semibold truncate max-w-full px-0.5 mt-0.5 ${
+              isOcc && !isMyTable ? 'text-rose-400 font-bold' : (isMyTable ? 'text-amber-400' : 'text-emerald-400')
+            }">
+              ${isOcc && !isMyTable ? '🔒 Occupied' : (isMyTable ? 'Your Table' : 'Free')}
+            </span>
+          </button>
+        `;
+      }
+      grid.innerHTML = html;
+
+      // Update occupancy alert in modal
+      const alertBox = document.getElementById('modal-table-occupied-alert');
+      const details = GunturDB.getTableDetails(modalSelectedTable);
+      const isMyTable = details.isOccupied && details.sessionToken && savedToken === details.sessionToken;
+
+      if (details.isOccupied && !isMyTable) {
+        if (alertBox) {
+          alertBox.classList.remove('hidden');
+          alertBox.innerHTML = `🚫 <strong>Table ${modalSelectedTable} is already occupied</strong> by "${details.guestName || 'another guest'}". Please select an available green table.`;
+        }
+      } else {
+        if (alertBox) alertBox.classList.add('hidden');
+      }
+    }
+
+    function selectModalTable(tid) {
+      const details = GunturDB.getTableDetails(tid);
+      const savedToken = sessionStorage.getItem('CURRENT_SESSION_TOKEN');
+      const isMyTable = (details.isOccupied && details.sessionToken && savedToken === details.sessionToken);
+
+      if (details.isOccupied && !isMyTable) {
+        GunturUtils.toast(`🚫 Table ${tid} is already occupied by ${details.guestName || 'another guest'}. Please choose a free green table.`, 'error', 4500);
+        const alertBox = document.getElementById('modal-table-occupied-alert');
+        if (alertBox) {
+          alertBox.classList.remove('hidden');
+          alertBox.innerHTML = `🚫 <strong>Table ${tid} is Occupied:</strong> Please select an available green table.`;
+        }
+        return;
+      }
+
+      modalSelectedTable = tid;
+      renderModalTableGrid();
+    }
+
+    function confirmTableCheckin() {
+      const input = document.getElementById('modal-guest-name-input');
+      const name = input ? input.value.trim() : '';
+
+      if (!name) {
+        GunturUtils.toast('Please enter your Guest / Party Name to continue.', 'info');
+        if (input) { input.focus(); input.classList.add('ring-2', 'ring-rose-500'); setTimeout(() => input.classList.remove('ring-2', 'ring-rose-500'), 1500); }
+        return;
+      }
+
+      const details = GunturDB.getTableDetails(modalSelectedTable);
+      const savedToken = sessionStorage.getItem('CURRENT_SESSION_TOKEN');
+      const isMyTable = (details.isOccupied && details.sessionToken && savedToken === details.sessionToken);
+
+      if (details.isOccupied && !isMyTable) {
+        GunturUtils.toast(`Table ${modalSelectedTable} is occupied by another guest! Please choose a free table.`, 'error');
+        return;
+      }
+
+      currentTableId = modalSelectedTable;
+      currentGuestName = name;
+
+      closeTableSelectModal();
+      finalizeCheckin();
+      updateAllViews();
+
+      GunturUtils.toast(`Welcome to Nawabs, ${currentGuestName}! Checked in to Table ${currentTableId}.`, 'success');
+    }
+
+    // Navigation & Tabs
+    function switchTab(tabName) {
+      currentTab = tabName;
+      ['home', 'menu', 'cart', 'orders', 'fun'].forEach(t => {
+        const view = document.getElementById(`view-${t}`);
+        const btn = document.getElementById(`nav-btn-${t}`);
+        if (t === tabName) {
+          view.classList.remove('hidden');
+          btn.classList.add('text-gold');
+          btn.classList.remove('text-gray-400');
+        } else {
+          view.classList.add('hidden');
+          btn.classList.remove('text-gold');
+          btn.classList.add('text-gray-400');
+        }
+      });
+
+      if (tabName === 'menu') renderMenuItems();
+      if (tabName === 'cart') renderCartView();
+      if (tabName === 'orders') renderOrdersView();
+      if (tabName === 'fun') { checkGamesAccess(); updateGameInviteCard(); }
+      updateCartBadge();
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function filterAndShowMenu(cat) {
+      currentCategory = cat;
+      switchTab('menu');
+      renderCategories();
+      renderMenuItems();
+    }
+
+    // Menu Filters & Search
+    function renderCategories() {
+      const categories = ['All', 'Biryani', 'Starters', 'Main Course', 'Tandoori', 'Breads & Rice', 'Soups', 'Beverages', 'Desserts'];
+      const container = document.getElementById('category-tabs');
+      container.innerHTML = categories.map(cat => {
+        const isActive = currentCategory === cat;
+        return `
+          <button 
+            onclick="setCategory('${cat}')" 
+            class="px-3 py-1.5 rounded-full font-medium whitespace-nowrap transition ${
+              isActive 
+                ? 'bg-gold text-charcoal font-bold shadow-md' 
+                : 'bg-surfaceCard text-gray-300 border border-surfaceBorder hover:text-white'
+            }"
+          >
+            ${cat}
+          </button>
+        `;
+      }).join('');
+    }
+
+    // Menu Cards Viewer Logic
+    let activeCardIndex = 0;
+    let isZoomed = false;
+
+    function openMenuCardsModal(index = 0) {
+      document.getElementById('cards-modal').classList.remove('hidden');
+      selectCard(index);
+    }
+
+    function closeMenuCardsModal() {
+      document.getElementById('cards-modal').classList.add('hidden');
+    }
+
+    function initCardTabs() {
+      const tabs = document.getElementById('cards-tab-bar');
+      const cards = GunturDB.menuCards || [];
+      tabs.innerHTML = cards.map((c, i) => `
+        <button onclick="selectCard(${i})" class="px-3 py-1.5 rounded-xl whitespace-nowrap text-[11px] font-semibold transition ${
+          activeCardIndex === i ? 'bg-gold text-charcoal shadow-md' : 'bg-surfaceCard text-gray-300 border border-surfaceBorder hover:text-white'
+        }">
+          ${c.title}
+        </button>
+      `).join('');
+    }
+
+    function selectCard(idx) {
+      const cards = GunturDB.menuCards || [];
+      if (!cards.length) return;
+      activeCardIndex = (idx + cards.length) % cards.length;
+      const c = cards[activeCardIndex];
+      document.getElementById('card-img').src = c.file;
+      document.getElementById('card-modal-title').textContent = c.title;
+      document.getElementById('card-modal-subtitle').textContent = c.subtitle;
+      document.getElementById('card-counter').textContent = `${activeCardIndex + 1} / ${cards.length}`;
+      isZoomed = false;
+      document.getElementById('card-img-wrapper').style.transform = 'scale(1)';
+      initCardTabs();
+    }
+
+    function prevCard() { selectCard(activeCardIndex - 1); }
+    function nextCard() { selectCard(activeCardIndex + 1); }
+
+    function toggleCardZoom() {
+      isZoomed = !isZoomed;
+      document.getElementById('card-img-wrapper').style.transform = isZoomed ? 'scale(1.4)' : 'scale(1)';
+    }
+
+    function orderFromCurrentCard() {
+      const cards = GunturDB.menuCards || [];
+      const current = cards[activeCardIndex];
+      closeMenuCardsModal();
+      switchTab('menu');
+      if (current && current.category) {
+        setCategory(current.category);
+      }
+    }
+
+    function setCategory(cat) {
+      currentCategory = cat;
+      renderCategories();
+      renderMenuItems();
+    }
+
+    function setDietFilter(filter) {
+      currentDietFilter = filter;
+      ['all', 'veg', 'nonveg'].forEach(f => {
+        const btn = document.getElementById(`diet-${f}-btn`);
+        if (f === filter) {
+          btn.className = 'px-3 py-1 rounded-full text-[11px] font-semibold bg-gold text-charcoal';
+        } else {
+          btn.className = 'px-3 py-1 rounded-full text-[11px] font-semibold bg-surfaceCard text-gray-300 border border-surfaceBorder';
+        }
+      });
+      renderMenuItems();
+    }
+
+    function handleSearch(q) {
+      searchQuery = q.trim().toLowerCase();
+      renderMenuItems();
+    }
+
+    // Render Menu Items
+    function renderMenuItems() {
+      const container = document.getElementById('menu-items-container');
+      const menu = GunturDB.state.menu;
+
+      const filtered = menu.filter(item => {
+        // Category filter
+        if (currentCategory !== 'All' && item.category !== currentCategory) return false;
+        // Diet filter
+        if (currentDietFilter === 'veg' && !item.isVeg) return false;
+        if (currentDietFilter === 'nonveg' && item.isVeg) return false;
+        // Search query
+        if (searchQuery) {
+          const matchName = item.name.toLowerCase().includes(searchQuery);
+          const matchDesc = item.desc.toLowerCase().includes(searchQuery);
+          const matchCat = item.category.toLowerCase().includes(searchQuery);
+          if (!matchName && !matchDesc && !matchCat) return false;
+        }
+        return true;
+      });
+
+      if (!filtered.length) {
+        container.innerHTML = `
+          <div class="text-center py-10 glass-card rounded-2xl p-6 text-gray-400 space-y-2">
+            <span class="text-3xl">🍲</span>
+            <p class="text-sm font-semibold">No dishes found matching your selection.</p>
+            <p class="text-xs">Try selecting 'All' or clearing the search box.</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = filtered.map(item => {
+        const qty = cart[item.id] || 0;
+        const spiceIcons = '🌶️'.repeat(item.spice || 1);
+        const isAvailable = item.available !== false;
+
+        return `
+          <div class="p-4 rounded-3xl glass-card border border-gold/20 flex gap-3.5 relative transition duration-200 hover:border-gold/45 shadow-lg">
+            <!-- Details -->
+            <div class="flex-1 flex flex-col justify-between min-w-0 pr-1">
+              <div>
+                <div class="flex items-center gap-2 mb-1.5 flex-wrap">
+                  <span class="${item.isVeg ? 'veg-indicator' : 'nonveg-indicator'}"></span>
+                  <span class="text-[10px] px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-gray-300 font-medium">${item.category}</span>
+                  <span class="text-[10px] text-amber-400" title="Spice level">${spiceIcons}</span>
+                </div>
+                <h4 class="font-serif font-bold text-base text-white leading-tight tracking-tight">${item.name}</h4>
+                <p class="text-[11px] text-gray-300 mt-1 line-clamp-2 leading-relaxed">${item.desc}</p>
+              </div>
+
+              <div class="mt-3 flex items-center justify-between">
+                <span class="text-gold font-extrabold text-base tracking-tight font-sans">${GunturUtils.formatCurrency(item.price)}</span>
+              </div>
+            </div>
+
+            <!-- Dish Image + Anchored Action Button -->
+            <div class="w-28 flex flex-col items-center flex-shrink-0 relative">
+              <div class="w-28 h-28 rounded-2xl overflow-hidden bg-black/60 border border-white/10 shadow-md relative">
+                <img src="${item.image}" alt="${item.name}" class="w-full h-full object-cover" onerror="this.src='https://images.unsplash.com/photo-1600891964599-f61ba0e24092?auto=format&fit=crop&w=600&q=80'" />
+                <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent"></div>
+              </div>
+
+              <!-- Button overlapping bottom of image -->
+              <div class="-mt-4 relative z-10 w-24">
+                ${
+                  !isAvailable 
+                    ? `<span class="block text-center text-[10px] bg-rose-950/80 border border-rose-500/50 text-rose-300 font-bold py-1 px-2 rounded-xl">Sold Out</span>`
+                    : qty > 0 
+                      ? `
+                        <div class="flex items-center justify-between bg-gold text-charcoal font-black rounded-xl p-1 shadow-lg border border-goldLight">
+                          <button onclick="updateCartItemQty(${item.id}, -1)" class="w-6 h-6 rounded-lg bg-black/20 hover:bg-black/30 text-charcoal font-bold flex items-center justify-center text-xs active:scale-90">-</button>
+                          <span class="text-xs font-black px-1">${qty}</span>
+                          <button onclick="updateCartItemQty(${item.id}, 1)" class="w-6 h-6 rounded-lg bg-black/20 hover:bg-black/30 text-charcoal font-bold flex items-center justify-center text-xs active:scale-90">+</button>
+                        </div>
+                      `
+                      : `
+                        <button onclick="updateCartItemQty(${item.id}, 1)" class="w-full btn-gold py-1.5 px-3 rounded-xl text-xs font-black shadow-lg flex items-center justify-center gap-1 active:scale-95 transition">
+                          <span>+ ADD</span>
+                        </button>
+                      `
+                }
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // Home recommendations
+    function renderHomeRecommendations() {
+      const container = document.getElementById('home-recommendations');
+      const specials = GunturDB.state.menu.slice(0, 3);
+      container.innerHTML = specials.map(item => `
+        <div onclick="switchTab('menu')" class="p-3 rounded-2xl glass-card flex items-center justify-between gap-3 cursor-pointer hover:border-gold/30 transition">
+          <div class="flex items-center gap-2.5">
+            <span class="text-2xl">${item.emoji}</span>
+            <div>
+              <h5 class="font-serif font-bold text-xs text-white">${item.name}</h5>
+              <span class="text-[10px] text-gray-400">${item.category}</span>
+            </div>
+          </div>
+          <span class="text-gold font-bold text-xs">${GunturUtils.formatCurrency(item.price)}</span>
+        </div>
+      `).join('');
+    }
+
+    // Cart Management
+    function updateCartItemQty(itemId, delta) {
+      cart[itemId] = (cart[itemId] || 0) + delta;
+      if (cart[itemId] <= 0) delete cart[itemId];
+
+      localStorage.setItem(`CART_${currentTableId}`, JSON.stringify(cart));
+      updateCartBadge();
+      renderMenuItems();
+      if (currentTab === 'cart') renderCartView();
+      GunturSound.click();
+    }
+
+    function clearCart() {
+      cart = {};
+      localStorage.removeItem(`CART_${currentTableId}`);
+      updateCartBadge();
+      renderMenuItems();
+      if (currentTab === 'cart') renderCartView();
+      GunturUtils.toast('Cart cleared.');
+    }
+
+    function updateCartBadge() {
+      const totalQty = Object.values(cart).reduce((sum, q) => sum + q, 0);
+      const badge = document.getElementById('cart-nav-badge');
+      const floatingBar = document.getElementById('floating-cart-bar');
+
+      if (totalQty > 0) {
+        badge.textContent = totalQty;
+        badge.classList.remove('hidden');
+
+        if (floatingBar) {
+          if (currentTab === 'cart') {
+            floatingBar.classList.add('hidden');
+          } else {
+            floatingBar.classList.remove('hidden');
+            let subtotal = 0;
+            const menu = GunturDB.state.menu;
+            Object.keys(cart).forEach(id => {
+              const item = menu.find(m => m.id == id);
+              if (item) subtotal += item.price * cart[id];
+            });
+            document.getElementById('floating-cart-count').textContent = totalQty;
+            document.getElementById('floating-cart-subtotal').textContent = GunturUtils.formatCurrency(subtotal);
+          }
+        }
+      } else {
+        badge.classList.add('hidden');
+        if (floatingBar) floatingBar.classList.add('hidden');
+      }
+    }
+
+    function renderCartView() {
+      const container = document.getElementById('cart-content-container');
+      const itemIds = Object.keys(cart);
+
+      if (!itemIds.length) {
+        container.innerHTML = `
+          <div class="text-center py-12 glass-card rounded-3xl p-6 text-gray-400 space-y-3">
+            <span class="text-4xl">🛒</span>
+            <h4 class="font-bold text-base text-white">Your Cart is Empty</h4>
+            <p class="text-xs">Browse our signature Andhra biryanis and curries to add items to your table order.</p>
+            <button onclick="switchTab('menu')" class="btn-gold px-5 py-2.5 rounded-xl text-xs font-bold inline-block mt-2">
+              Browse Menu
+            </button>
+          </div>
+        `;
+        return;
+      }
+
+      let subtotal = 0;
+      const menu = GunturDB.state.menu;
+
+      const itemsHtml = itemIds.map(id => {
+        const item = menu.find(m => m.id == id);
+        if (!item) return '';
+        const qty = cart[id];
+        const itemTotal = item.price * qty;
+        subtotal += itemTotal;
+
+        return `
+          <div class="p-3 rounded-2xl glass-card flex items-center justify-between gap-3 border border-gold/15">
+            <div class="flex items-center gap-2.5">
+              <span class="${item.isVeg ? 'veg-indicator' : 'nonveg-indicator'}"></span>
+              <div>
+                <h5 class="font-serif font-bold text-xs text-white">${item.name}</h5>
+                <span class="text-[11px] text-gray-400">${GunturUtils.formatCurrency(item.price)} × ${qty}</span>
+              </div>
+            </div>
+            <div class="flex items-center gap-3">
+              <div class="flex items-center gap-1.5 bg-black/40 border border-gold/20 rounded-lg px-2 py-0.5">
+                <button onclick="updateCartItemQty(${item.id}, -1)" class="text-xs font-bold text-gold px-1">-</button>
+                <span class="text-xs font-bold text-white px-1">${qty}</span>
+                <button onclick="updateCartItemQty(${item.id}, 1)" class="text-xs font-bold text-gold px-1">+</button>
+              </div>
+              <span class="text-gold font-bold text-xs w-16 text-right">${GunturUtils.formatCurrency(itemTotal)}</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      const gst = Math.round(subtotal * 0.05); // 5% GST
+      const grandTotal = subtotal + gst;
+
+      container.innerHTML = `
+        <div class="space-y-2">
+          ${itemsHtml}
+        </div>
+
+        <!-- Special Cooking Instructions (Optional - Requirement 5) -->
+        <div class="glass-card p-3.5 rounded-2xl space-y-2 border border-gold/25 shadow-md">
+          <div class="flex items-center justify-between">
+            <label class="text-xs font-bold text-gold flex items-center gap-1.5">
+              <span>👨‍🍳</span> Special Cooking Instructions (Optional):
+            </label>
+            <span class="text-[10px] text-gray-400 font-medium">Sent to Reception & Chef</span>
+          </div>
+
+          <!-- Quick Suggestion Pills -->
+          <div class="flex flex-wrap gap-1.5">
+            <button type="button" onclick="appendOrderNote('🌶️ Less Spicy')" class="px-2.5 py-1 rounded-lg text-[10px] bg-white/5 hover:bg-gold/20 text-gray-300 border border-white/10 font-medium transition">🌶️ Less Spicy</button>
+            <button type="button" onclick="appendOrderNote('🔥 Extra Spicy')" class="px-2.5 py-1 rounded-lg text-[10px] bg-white/5 hover:bg-gold/20 text-gray-300 border border-white/10 font-medium transition">🔥 Extra Spicy</button>
+            <button type="button" onclick="appendOrderNote('🧅 No Onion/Garlic')" class="px-2.5 py-1 rounded-lg text-[10px] bg-white/5 hover:bg-gold/20 text-gray-300 border border-white/10 font-medium transition">🧅 No Onion</button>
+            <button type="button" onclick="appendOrderNote('🥛 Extra Raita')" class="px-2.5 py-1 rounded-lg text-[10px] bg-white/5 hover:bg-gold/20 text-gray-300 border border-white/10 font-medium transition">🥛 Extra Raita</button>
+            <button type="button" onclick="appendOrderNote('🍲 Serve Starters First')" class="px-2.5 py-1 rounded-lg text-[10px] bg-white/5 hover:bg-gold/20 text-gray-300 border border-white/10 font-medium transition">🍲 Starters First</button>
+            <button type="button" onclick="appendOrderNote('🥣 Less Oil')" class="px-2.5 py-1 rounded-lg text-[10px] bg-white/5 hover:bg-gold/20 text-gray-300 border border-white/10 font-medium transition">🥣 Less Oil</button>
+          </div>
+
+          <input 
+            type="text" 
+            id="order-notes-input" 
+            placeholder="e.g. Please make biryani mild for kids, extra lemon, bring food piping hot..." 
+            class="w-full px-3.5 py-2.5 rounded-xl bg-black/40 border border-white/10 text-xs text-white focus:outline-none focus:border-gold transition shadow-inner font-medium"
+          />
+        </div>
+
+        <!-- Bill Breakdown -->
+        <div class="glass-gold p-4 rounded-2xl space-y-2 text-xs border border-gold/30">
+          <div class="flex justify-between text-gray-300">
+            <span>Item Subtotal:</span>
+            <span>${GunturUtils.formatCurrency(subtotal)}</span>
+          </div>
+          <div class="flex justify-between text-gray-300">
+            <span>Restaurant GST (5%):</span>
+            <span>${GunturUtils.formatCurrency(gst)}</span>
+          </div>
+          <div class="border-t border-gold/20 pt-2 flex justify-between items-center text-sm font-bold text-white">
+            <span class="text-gold">Grand Total:</span>
+            <span class="text-gold text-base">${GunturUtils.formatCurrency(grandTotal)}</span>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button onclick="placeCustomerOrder(${subtotal}, ${gst}, ${grandTotal})" class="w-full btn-gold py-3.5 rounded-2xl text-sm font-bold shadow-xl flex items-center justify-center gap-2">
+          <span>Place Order for Table ${currentTableId}</span>
+          <span>→</span>
+        </button>
+      `;
+    }
+
+    function placeCustomerOrder(subtotal, tax, grandTotal) {
+      const itemIds = Object.keys(cart);
+      if (!itemIds.length) return;
+
+      const menu = GunturDB.state.menu;
+      const orderItems = itemIds.map(id => {
+        const item = menu.find(m => m.id == id);
+        return {
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          qty: cart[id],
+          isVeg: item.isVeg,
+          emoji: item.emoji
+        };
+      });
+
+      const notes = document.getElementById('order-notes-input')?.value || '';
+
+      const newOrder = GunturDB.createOrder({
+        tableId: currentTableId,
+        guestName: currentGuestName || `Table ${currentTableId} Guest`,
+        items: orderItems,
+        notes,
+        subtotal,
+        tax,
+        total: grandTotal,
+        sessionToken
+      });
+
+      // Clear local cart
+      cart = {};
+      localStorage.removeItem(`CART_${currentTableId}`);
+      updateCartBadge();
+
+      GunturUtils.toast('Order sent to reception! Tracking live status.', 'success');
+      switchTab('orders');
+    }
+
+    function appendOrderNote(tag) {
+      const input = document.getElementById('order-notes-input');
+      if (!input) return;
+      const cur = input.value.trim();
+      if (!cur) {
+        input.value = tag;
+      } else if (!cur.includes(tag)) {
+        input.value = cur + ', ' + tag;
+      }
+      input.focus();
+    }
+
+    // Consolidated Table Bill & Live Order Tracker (Requirements 2 & 3)
+    function renderOrdersView() {
+      const container = document.getElementById('orders-list-container');
+      const orders = GunturDB.state.orders.filter(o => o.tableId === currentTableId);
+      const combined = GunturDB.getCombinedTableBill(currentTableId);
+
+      if (!orders.length) {
+        container.innerHTML = `
+          <div class="text-center py-12 glass-card rounded-3xl p-6 text-gray-400 space-y-2">
+            <span class="text-4xl">📋</span>
+            <h4 class="font-bold text-base text-white">No Orders Placed Yet</h4>
+            <p class="text-xs">Once you place an order, track kitchen acceptance, cooking timer, and serving status here.</p>
+          </div>
+        `;
+        return;
+      }
+
+      // 1. Consolidated Table Running Bill Card (Requirements 2 & 3)
+      let combinedCardHtml = `
+        <div class="glass-card rounded-3xl p-4 sm:p-5 border-2 border-gold/40 shadow-2xl space-y-3.5 bg-gradient-to-br from-surfaceCard via-black/50 to-indigo-950/30">
+          <div class="flex items-start justify-between border-b border-gold/20 pb-3">
+            <div>
+              <span class="px-2.5 py-0.5 rounded-full bg-gold/15 text-gold text-[10px] font-bold border border-gold/30 uppercase tracking-wider">Table ${currentTableId} Running Bill</span>
+              <h3 class="font-serif font-bold text-base text-white mt-1">Nawabs Consolidated Tab</h3>
+              <p class="text-[11px] text-gray-400 mt-0.5">
+                ${combined.orderCount} order round${combined.orderCount > 1 ? 's' : ''} (${combined.previousOrders.length} Served, ${combined.activeOrders.length} Active)
+              </p>
+            </div>
+            <div class="text-right">
+              <span class="text-[10px] text-gray-400 block font-semibold uppercase">Total Due</span>
+              <span class="text-xl sm:text-2xl font-black text-gold font-mono">${GunturUtils.formatCurrency(combined.total)}</span>
+            </div>
+          </div>
+
+          <!-- Combined Items Drawer Toggle -->
+          <div class="space-y-2">
+            <div class="flex items-center justify-between text-xs font-bold text-gray-300">
+              <span>All Ordered Dishes:</span>
+              <button onclick="toggleCombinedBillDetails()" id="btn-toggle-combined" class="text-[11px] text-gold hover:underline flex items-center gap-1 font-semibold">
+                <span>View Combined Breakdown (${combined.combinedItems.length})</span>
+                <span id="combined-arrow">▼</span>
+              </button>
+            </div>
+            
+            <div id="combined-bill-items-drawer" class="hidden p-3.5 rounded-2xl bg-black/60 border border-white/5 space-y-2 text-xs">
+              <div class="space-y-1.5 max-h-48 overflow-y-auto no-scrollbar">
+                ${combined.combinedItems.map(it => `
+                  <div class="flex justify-between items-center text-gray-300 py-0.5">
+                    <span>${it.emoji || '🍽️'} ${it.name} <strong class="text-gold font-bold">× ${it.qty}</strong></span>
+                    <span class="font-mono text-gray-200 font-semibold">${GunturUtils.formatCurrency(it.price * it.qty)}</span>
+                  </div>
+                `).join('')}
+              </div>
+              <div class="border-t border-white/10 pt-2 text-[11px] space-y-1">
+                <div class="flex justify-between text-gray-400"><span>Combined Subtotal:</span><span>${GunturUtils.formatCurrency(combined.subtotal)}</span></div>
+                <div class="flex justify-between text-gray-400"><span>Restaurant GST (5%):</span><span>${GunturUtils.formatCurrency(combined.tax)}</span></div>
+                <div class="flex justify-between text-gold font-bold text-xs pt-1 border-t border-white/5"><span>Grand Total:</span><span>${GunturUtils.formatCurrency(combined.total)}</span></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Make a Bill / Settle Bill Button (Requirement 2 & 4) -->
+          <button onclick="openCustomerBillModal()" class="w-full btn-gold py-3.5 rounded-2xl text-xs sm:text-sm font-black shadow-xl flex items-center justify-center gap-2 transition hover:scale-[1.01]">
+            <span>💳 Make a Bill / Request Settlement</span>
+            <span class="text-base">→</span>
+          </button>
+        </div>
+      `;
+
+      // 2. Individual Order Rounds Stepper
+      const stepperCardsHtml = orders.map((order, oIdx) => {
+        const steps = [
+          { key: 'PLACED', label: 'Order Placed', desc: 'Sent to reception' },
+          { key: 'ACCEPTED', label: 'Order Accepted', desc: 'Forwarded to kitchen' },
+          { key: 'PREPARING', label: 'Cooking in Progress', desc: 'Chef preparing fresh' },
+          { key: 'READY', label: 'Order Ready', desc: 'Food prepared hot' },
+          { key: 'SERVED', label: 'Served', desc: 'Enjoy your meal!' }
+        ];
+
+        const statusRank = { 'PLACED': 1, 'ACCEPTED': 2, 'PREPARING': 3, 'READY': 4, 'SERVED': 5, 'COMPLETED': 5, 'REJECTED': -1 };
+        const currentRank = statusRank[order.status] || 1;
+        const isReady = order.status === 'READY';
+        const isRejected = order.status === 'REJECTED';
+        const isServed = order.status === 'SERVED';
+        const isCompleted = order.status === 'COMPLETED';
+
+        const stepperHtml = isRejected ? `
+          <div class="p-3 rounded-xl bg-rose-950/60 border border-rose-500/40 text-rose-200 text-xs">
+            <p class="font-bold">❌ Order Declined by Reception</p>
+            <p class="mt-0.5">${order.rejectReason || 'Kitchen capacity at maximum. Please call staff.'}</p>
+          </div>
+        ` : `
+          <div class="space-y-3 relative pl-6 before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-white/10">
+            ${steps.map((st, idx) => {
+              const rank = idx + 1;
+              const isDone = currentRank >= rank;
+              const isCurrent = currentRank === rank && !isServed && !isCompleted;
+
+              return `
+                <div class="relative flex items-start gap-3">
+                  <div class="absolute -left-6 w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold ${
+                    isDone 
+                      ? 'bg-emerald-500 text-black shadow-lg shadow-emerald-500/50' 
+                      : 'bg-surfaceCard border border-white/20 text-gray-500'
+                  } ${isCurrent ? 'ring-4 ring-emerald-400/30 animate-pulse' : ''}">
+                    ${isDone ? '✓' : rank}
+                  </div>
+                  <div>
+                    <h5 class="text-xs font-bold ${isDone ? 'text-white' : 'text-gray-500'}">${st.label}</h5>
+                    <p class="text-[10px] ${isDone ? 'text-gray-300' : 'text-gray-600'}">${st.desc}</p>
+                  </div>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+
+        return `
+          <div class="p-4 rounded-3xl glass-card border border-gold/25 space-y-4">
+            <div class="flex items-center justify-between border-b border-gold/15 pb-3">
+              <div>
+                <span class="text-xs font-mono text-gold font-bold">Round #${oIdx + 1} (Order #${order.id})</span>
+                <span class="text-[10px] text-gray-400 ml-2">${GunturUtils.formatTime(order.createdAt)}</span>
+              </div>
+              <span class="px-2.5 py-1 rounded-full text-[10px] font-bold ${
+                isReady ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 animate-pulse' :
+                isServed || isCompleted ? 'bg-blue-500/20 text-blue-300 border border-blue-500/30' :
+                'bg-gold/15 text-gold border border-gold/30'
+              }">
+                ${isCompleted ? 'SERVED & BILLED' : order.status}
+              </span>
+            </div>
+
+            <!-- Items summary -->
+            <div class="space-y-1 text-xs">
+              ${order.items.map(it => `
+                <div class="flex justify-between text-gray-300">
+                  <span>${it.emoji || '🍽️'} ${it.name} × ${it.qty}</span>
+                  <span class="font-mono">${GunturUtils.formatCurrency(it.price * it.qty)}</span>
+                </div>
+              `).join('')}
+              ${order.notes ? `<p class="text-[11px] text-amber-300/90 italic mt-1 font-medium bg-amber-950/30 p-2 rounded-xl border border-amber-500/20">👨‍🍳 Cooking Note: "${order.notes}"</p>` : ''}
+              <div class="border-t border-white/5 pt-1.5 flex justify-between font-bold text-white text-xs">
+                <span>Round Total:</span>
+                <span class="text-gold font-mono">${GunturUtils.formatCurrency(order.total)}</span>
+              </div>
+            </div>
+
+            <!-- Vertical Progress Stepper -->
+            ${stepperHtml}
+          </div>
+        `;
+      }).join('');
+
+      container.innerHTML = combinedCardHtml + stepperCardsHtml;
+    }
+
+    // Bill Settlement Modal & Feedback Handlers (Requirements 2, 3 & 4)
+    let selectedPaymentMethod = 'UPI';
+    let customerFeedbackRating = 5;
+    let customerFeedbackTags = [];
+
+    function toggleCombinedBillDetails() {
+      const drawer = document.getElementById('combined-bill-items-drawer');
+      const arrow = document.getElementById('combined-arrow');
+      if (!drawer) return;
+      const isHidden = drawer.classList.contains('hidden');
+      if (isHidden) {
+        drawer.classList.remove('hidden');
+        if (arrow) arrow.textContent = '▲';
+      } else {
+        drawer.classList.add('hidden');
+        if (arrow) arrow.textContent = '▼';
+      }
+    }
+
+    function openCustomerBillModal() {
+      const combined = GunturDB.getCombinedTableBill(currentTableId);
+      if (!combined.orderCount) {
+        GunturUtils.toast('No orders placed yet for this table.', 'info');
+        return;
+      }
+
+      document.getElementById('bill-modal-table-label').textContent = `Table ${currentTableId} • Guest: ${currentGuestName || 'Guest'}`;
+      document.getElementById('bill-modal-item-count').textContent = `${combined.combinedItems.length} Dishes Total`;
+      document.getElementById('bill-modal-subtotal').textContent = GunturUtils.formatCurrency(combined.subtotal);
+      document.getElementById('bill-modal-tax').textContent = GunturUtils.formatCurrency(combined.tax);
+      document.getElementById('bill-modal-total').textContent = GunturUtils.formatCurrency(combined.total);
+
+      const itemsList = document.getElementById('bill-modal-items-list');
+      if (itemsList) {
+        itemsList.innerHTML = combined.combinedItems.map(it => `
+          <div class="flex justify-between items-center text-gray-300 py-0.5">
+            <span>${it.emoji || '🍽️'} ${it.name} <strong class="text-gold font-bold">× ${it.qty}</strong></span>
+            <span class="font-mono text-gray-200">${GunturUtils.formatCurrency(it.price * it.qty)}</span>
+          </div>
+        `).join('');
+      }
+
+      setFeedbackRating(5);
+      customerFeedbackTags = [];
+      document.querySelectorAll('#feedback-tags-container .tag-btn').forEach(btn => {
+        btn.classList.remove('bg-gold', 'text-charcoal', 'border-gold', 'font-bold');
+        btn.classList.add('bg-white/5', 'text-gray-300');
+      });
+
+      selectPaymentMethod('UPI');
+      document.getElementById('customer-bill-modal').classList.remove('hidden');
+    }
+
+    function closeCustomerBillModal() {
+      const modal = document.getElementById('customer-bill-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function selectPaymentMethod(method) {
+      selectedPaymentMethod = method;
+      ['UPI', 'Card', 'Cash', 'Reception'].forEach(m => {
+        const btn = document.getElementById(`pay-opt-${m}`);
+        if (!btn) return;
+        if (m === method) {
+          btn.className = 'p-2.5 rounded-xl border border-gold bg-gold/25 text-gold font-bold flex items-center gap-2 transition shadow-md';
+        } else {
+          btn.className = 'p-2.5 rounded-xl border border-white/10 bg-surfaceCard text-gray-300 hover:border-gold/40 flex items-center gap-2 transition';
+        }
+      });
+    }
+
+    function setFeedbackRating(stars) {
+      customerFeedbackRating = stars;
+      const labels = ['', '1.0 Poor', '2.0 Fair', '3.0 Good', '4.0 Very Good', '5.0 Excellent ⭐'];
+      const lbl = document.getElementById('feedback-rating-label');
+      if (lbl) lbl.textContent = labels[stars] || `${stars}.0`;
+
+      document.querySelectorAll('#star-rating-container .star-btn').forEach(b => {
+        const val = Number(b.dataset.star);
+        if (val <= stars) {
+          b.className = 'text-2xl text-amber-400 hover:scale-110 transition star-btn';
+        } else {
+          b.className = 'text-2xl text-gray-600 hover:scale-110 transition star-btn';
+        }
+      });
+    }
+
+    function toggleFeedbackTag(tag, el) {
+      const idx = customerFeedbackTags.indexOf(tag);
+      if (idx >= 0) {
+        customerFeedbackTags.splice(idx, 1);
+        el.classList.remove('bg-gold', 'text-charcoal', 'border-gold', 'font-bold');
+        el.classList.add('bg-white/5', 'text-gray-300');
+      } else {
+        customerFeedbackTags.push(tag);
+        el.classList.add('bg-gold', 'text-charcoal', 'border-gold', 'font-bold');
+        el.classList.remove('bg-white/5', 'text-gray-300');
+      }
+    }
+
+    function submitCustomerBillAndFeedback() {
+      const commentInput = document.getElementById('customer-feedback-comment');
+      const comment = commentInput ? commentInput.value.trim() : '';
+
+      // 1. Save guest feedback
+      GunturDB.saveFeedback({
+        tableId: currentTableId,
+        guestName: currentGuestName,
+        rating: customerFeedbackRating,
+        tags: customerFeedbackTags,
+        comment,
+        paymentMethod: selectedPaymentMethod
+      });
+
+      // 2. Alert Reception with Bill Settle Service Call
+      GunturDB.createServiceRequest(currentTableId, `Bill Requested (${selectedPaymentMethod} • ${customerFeedbackRating}★)`);
+
+      closeCustomerBillModal();
+      GunturSound.chimeReady();
+      GunturUtils.toast(`🎉 Thank you for dining with Nawabs! Bill settlement request & ${customerFeedbackRating}★ feedback sent to Reception. Our steward will arrive at Table ${currentTableId} shortly.`, 'success', 7000);
+    }
+
+    // Invite Friends QR & Game Share Logic (Requirement 6)
+    function updateGameInviteCard() {
+      const qrImg = document.getElementById('game-invite-qr-img');
+      const tableLbl = document.getElementById('invite-table-label');
+      if (tableLbl) tableLbl.textContent = `Table ${currentTableId}`;
+
+      const shareUrl = `${window.location.origin}${window.location.pathname}?table=${currentTableId}&tab=fun`;
+      if (qrImg) {
+        qrImg.src = `https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(shareUrl)}`;
+      }
+    }
+
+    function copyGameInviteLink() {
+      const shareUrl = `${window.location.origin}${window.location.pathname}?table=${currentTableId}&tab=fun`;
+      if (navigator.clipboard) {
+        navigator.clipboard.writeText(shareUrl).then(() => {
+          GunturUtils.toast('Table Game Lounge link copied to clipboard!', 'success');
+        }).catch(() => {
+          prompt('Copy this Table Game link:', shareUrl);
+        });
+      } else {
+        prompt('Copy this Table Game link:', shareUrl);
+      }
+    }
+
+    function shareGameWithFriends() {
+      const shareUrl = `${window.location.origin}${window.location.pathname}?table=${currentTableId}&tab=fun`;
+      if (navigator.share) {
+        navigator.share({
+          title: `Join games at Nawabs Table ${currentTableId}!`,
+          text: `We are at Nawabs Table ${currentTableId}! Tap to play table games together:`,
+          url: shareUrl
+        }).catch(() => {
+          copyGameInviteLink();
+        });
+      } else {
+        copyGameInviteLink();
+      }
+    }
+
+    let tttGameMode = 'bot'; // 'bot' or 'pvp'
+    function setTTTMode(mode) {
+      tttGameMode = mode;
+      const bBot = document.getElementById('ttt-mode-bot');
+      const bPvp = document.getElementById('ttt-mode-pvp');
+      if (mode === 'bot') {
+        if (bBot) { bBot.className = 'px-2.5 py-1 rounded-lg bg-gold text-charcoal font-bold transition'; }
+        if (bPvp) { bPvp.className = 'px-2.5 py-1 rounded-lg bg-surfaceCard text-gray-400 border border-white/10 transition'; }
+        GunturUtils.toast('Tic-Tac-Toe mode: Play vs Chef Bot', 'info');
+      } else {
+        if (bBot) { bBot.className = 'px-2.5 py-1 rounded-lg bg-surfaceCard text-gray-400 border border-white/10 transition'; }
+        if (bPvp) { bPvp.className = 'px-2.5 py-1 rounded-lg bg-gold text-charcoal font-bold transition'; }
+        GunturUtils.toast('Tic-Tac-Toe mode: 2 Players Pass & Play at Table!', 'info');
+      }
+      resetTTT();
+    }
+
+    // Call Staff functionality
+    function openCallStaffModal() {
+      document.getElementById('call-staff-modal').classList.remove('hidden');
+    }
+
+    function closeCallStaffModal() {
+      document.getElementById('call-staff-modal').classList.add('hidden');
+    }
+
+    function submitServiceCall(type, icon) {
+      closeCallStaffModal();
+      GunturDB.createServiceRequest(currentTableId, type);
+      GunturUtils.toast(`🔔 Alert sent to reception: ${type}`);
+      checkActiveServiceAlerts();
+    }
+
+    function checkActiveServiceAlerts() {
+      const container = document.getElementById('active-service-alert');
+      const activeCalls = GunturDB.state.serviceRequests.filter(r => r.tableId === currentTableId && r.status === 'PENDING');
+      
+      if (activeCalls.length > 0) {
+        const latest = activeCalls[0];
+        container.classList.remove('hidden');
+        container.innerHTML = `
+          <div class="p-3 rounded-2xl bg-amber-950/60 border border-amber-500/40 text-amber-200 text-xs flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
+              <span>Staff notified: <b>${latest.type}</b></span>
+            </div>
+            <span class="text-[10px] text-gray-400">Assigned</span>
+          </div>
+        `;
+      } else {
+        container.classList.add('hidden');
+      }
+    }
+
+    // Wi-Fi & Games logic
+    function toggleWifiPassword() {
+      showWifiPw = !showWifiPw;
+      const pwDisplay = document.getElementById('wifi-password-display');
+      const settings = GunturDB.state.settings;
+      pwDisplay.textContent = showWifiPw ? settings.wifiPassword : '••••••••••••';
+    }
+
+    function copyWifiPassword() {
+      const settings = GunturDB.state.settings;
+      navigator.clipboard.writeText(settings.wifiPassword).then(() => {
+        GunturUtils.toast('Wi-Fi Password copied to clipboard!', 'success');
+      }).catch(() => {
+        GunturUtils.toast(`Password: ${settings.wifiPassword}`, 'info');
+      });
+    }
+
+    function checkGamesAccess() {
+      const hasOrder = GunturDB.state.orders.some(o => o.tableId === currentTableId);
+      const lockBanner = document.getElementById('games-lock-banner');
+      if (lockBanner) {
+        if (!hasOrder) {
+          lockBanner.classList.remove('hidden');
+        } else {
+          lockBanner.classList.add('hidden');
+        }
+      }
+    }
+
+    function switchGame(gameKey) {
+      ['ttt', 'memory', 'rps', 'trivia'].forEach(k => {
+        const container = document.getElementById(`game-${k}-container`);
+        const tabBtn = document.getElementById(`game-tab-${k}`);
+        if (k === gameKey) {
+          container.classList.remove('hidden');
+          tabBtn.className = 'p-2 rounded-xl bg-gold text-charcoal font-bold text-center';
+        } else {
+          container.classList.add('hidden');
+          tabBtn.className = 'p-2 rounded-xl bg-surfaceCard text-gray-300 border border-surfaceBorder text-center';
+        }
+      });
+      if (gameKey === 'memory') initMemoryGame();
+      if (gameKey === 'trivia') renderTriviaQuestion();
+    }
+
+    // --- GAME 1: TIC TAC TOE (Single player vs Chef Bot OR 2-Player Pass & Play) ---
+    let tttBoard = Array(9).fill('');
+    let tttGameOver = false;
+    let tttCurrentTurn = 'X';
+
+    function playTTT(index) {
+      if (tttBoard[index] || tttGameOver) return;
+      const mark = (tttGameMode === 'pvp') ? tttCurrentTurn : 'X';
+      tttBoard[index] = mark;
+      GunturSound.click();
+      renderTTT();
+
+      if (checkTTTWinner(mark)) {
+        document.getElementById('ttt-status-msg').textContent = (tttGameMode === 'pvp') ? `🎉 Player ${mark} Won!` : '🎉 You Won!';
+        tttGameOver = true;
+        return;
+      }
+      if (tttBoard.every(c => c !== '')) {
+        document.getElementById('ttt-status-msg').textContent = 'It\'s a Draw!';
+        tttGameOver = true;
+        return;
+      }
+
+      if (tttGameMode === 'pvp') {
+        tttCurrentTurn = (tttCurrentTurn === 'X') ? 'O' : 'X';
+        document.getElementById('ttt-status-msg').textContent = `Player ${tttCurrentTurn} Turn`;
+        return;
+      }
+
+      // Bot turn
+      document.getElementById('ttt-status-msg').textContent = 'Chef Bot thinking...';
+      setTimeout(() => {
+        botMoveTTT();
+      }, 400);
+    }
+
+    function botMoveTTT() {
+      if (tttGameOver) return;
+      const emptyIndices = tttBoard.map((c, i) => c === '' ? i : null).filter(i => i !== null);
+      if (!emptyIndices.length) return;
+
+      // Smart simple bot
+      const randomChoice = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+      tttBoard[randomChoice] = 'O';
+      renderTTT();
+
+      if (checkTTTWinner('O')) {
+        document.getElementById('ttt-status-msg').textContent = '👨‍🍳 Chef Bot Won!';
+        tttGameOver = true;
+      } else if (tttBoard.every(c => c !== '')) {
+        document.getElementById('ttt-status-msg').textContent = 'It\'s a Draw!';
+        tttGameOver = true;
+      } else {
+        document.getElementById('ttt-status-msg').textContent = 'Your Turn (X)';
+      }
+    }
+
+    function checkTTTWinner(mark) {
+      const wins = [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8],
+        [0, 3, 6], [1, 4, 7], [2, 5, 8],
+        [0, 4, 8], [2, 4, 6]
+      ];
+      return wins.some(([a, b, c]) => tttBoard[a] === mark && tttBoard[b] === mark && tttBoard[c] === mark);
+    }
+
+    function renderTTT() {
+      for (let i = 0; i < 9; i++) {
+        const btn = document.getElementById(`ttt-c${i}`);
+        btn.textContent = tttBoard[i];
+        if (tttBoard[i] === 'X') {
+          btn.className = 'w-full aspect-square rounded-2xl bg-black/40 border border-gold text-2xl font-bold flex items-center justify-center text-gold';
+        } else if (tttBoard[i] === 'O') {
+          btn.className = 'w-full aspect-square rounded-2xl bg-black/40 border border-emerald-500 text-2xl font-bold flex items-center justify-center text-emerald-400';
+        } else {
+          btn.className = 'w-full aspect-square rounded-2xl bg-black/40 border border-gold/20 text-2xl font-bold flex items-center justify-center hover:bg-gold/10 transition';
+        }
+      }
+    }
+
+    function resetTTT() {
+      tttBoard = Array(9).fill('');
+      tttGameOver = false;
+      tttCurrentTurn = 'X';
+      document.getElementById('ttt-status-msg').textContent = tttGameMode === 'pvp' ? 'Player X Turn' : 'Your Turn (X)';
+      renderTTT();
+    }
+
+    // --- GAME 2: MEMORY MATCH ---
+    const memoryEmojis = ['🍗', '🍛', '🌶️', '🧀', '🦐', '📜'];
+    let memCards = [];
+    let flippedIndices = [];
+    let matchedIndices = [];
+    let memMoves = 0;
+
+    function initMemoryGame() {
+      const deck = [...memoryEmojis, ...memoryEmojis].sort(() => Math.random() - 0.5);
+      memCards = deck;
+      flippedIndices = [];
+      matchedIndices = [];
+      memMoves = 0;
+      document.getElementById('mem-moves').textContent = '0';
+      document.getElementById('mem-matches').textContent = '0/6';
+      renderMemoryCards();
+    }
+
+    function renderMemoryCards() {
+      const grid = document.getElementById('memory-grid');
+      grid.innerHTML = memCards.map((emoji, idx) => {
+        const isFlipped = flippedIndices.includes(idx) || matchedIndices.includes(idx);
+        return `
+          <button 
+            onclick="flipMemoryCard(${idx})" 
+            class="aspect-square rounded-xl text-xl flex items-center justify-center font-bold transition transform duration-200 ${
+              isFlipped 
+                ? 'bg-gold/20 border-2 border-gold text-white' 
+                : 'bg-surfaceCard border border-white/10 hover:border-gold/30'
+            }"
+          >
+            ${isFlipped ? emoji : '❓'}
+          </button>
+        `;
+      }).join('');
+    }
+
+    function flipMemoryCard(idx) {
+      if (flippedIndices.length >= 2 || flippedIndices.includes(idx) || matchedIndices.includes(idx)) return;
+      flippedIndices.push(idx);
+      GunturSound.click();
+      renderMemoryCards();
+
+      if (flippedIndices.length === 2) {
+        memMoves++;
+        document.getElementById('mem-moves').textContent = memMoves;
+        const [first, second] = flippedIndices;
+        if (memCards[first] === memCards[second]) {
+          matchedIndices.push(first, second);
+          flippedIndices = [];
+          document.getElementById('mem-matches').textContent = `${matchedIndices.length / 2}/6`;
+          GunturSound.chimeReady();
+          renderMemoryCards();
+          if (matchedIndices.length === memCards.length) {
+            GunturUtils.toast('🎉 All pairs matched! You have great culinary memory!');
+          }
+        } else {
+          setTimeout(() => {
+            flippedIndices = [];
+            renderMemoryCards();
+          }, 800);
+        }
+      }
+    }
+
+    // --- GAME 3: ROCK PAPER SCISSORS ---
+    function playRPS(userChoice) {
+      const choices = ['rock', 'paper', 'scissors'];
+      const emojis = { rock: '✊', paper: '✋', scissors: '✌️' };
+      const botChoice = choices[Math.floor(Math.random() * choices.length)];
+
+      document.getElementById('rps-user-choice').textContent = emojis[userChoice];
+      document.getElementById('rps-bot-choice').textContent = emojis[botChoice];
+
+      const resultText = document.getElementById('rps-result-text');
+
+      if (userChoice === botChoice) {
+        resultText.textContent = "It's a Tie! Great minds think alike.";
+        resultText.className = 'text-sm font-bold text-amber-300';
+      } else if (
+        (userChoice === 'rock' && botChoice === 'scissors') ||
+        (userChoice === 'paper' && botChoice === 'rock') ||
+        (userChoice === 'scissors' && botChoice === 'paper')
+      ) {
+        resultText.textContent = "🎉 You Won against Chef Somanna! High five!";
+        resultText.className = 'text-sm font-bold text-emerald-400';
+        GunturSound.chimeReady();
+      } else {
+        resultText.textContent = "Chef Bot won! Try another round!";
+        resultText.className = 'text-sm font-bold text-rose-400';
+      }
+    }
+
+    // --- GAME 4: ANDHRA TRIVIA QUIZ ---
+    const triviaQuestions = [
+      {
+        q: 'What is the primary leaf herb that gives "Gongura" dishes their signature sour tang?',
+        options: ['Curry Leaves', 'Red Sorrel Leaves', 'Fenugreek Leaves', 'Spinach'],
+        correct: 1
+      },
+      {
+        q: 'Which famous Andhra region is world-renowned for its fiery GI-tagged red chillies?',
+        options: ['Warangal', 'Guntur', 'Kurnool', 'Tirupati'],
+        correct: 1
+      },
+      {
+        q: 'Atreyapuram is globally celebrated for which delicate, paper-thin sweet delicacy?',
+        options: ['Pootharekulu', 'Kaja', 'Bandar Laddu', 'Bobbatlu'],
+        correct: 0
+      },
+      {
+        q: 'What traditional legume is the main ingredient of "Ulavacharu"?',
+        options: ['Horse Gram', 'Chickpeas', 'Black Lentils', 'Green Gram'],
+        correct: 0
+      },
+      {
+        q: 'In Andhra cuisine, "Pesarattu" dosa is traditionally prepared from which batter?',
+        options: ['Fermented Rice', 'Whole Green Gram (Moong)', 'Wheat', 'Ragi'],
+        correct: 1
+      }
+    ];
+
+    let triviaIndex = 0;
+    let triviaScore = 0;
+    let triviaAnswered = false;
+
+    function renderTriviaQuestion() {
+      const card = document.getElementById('trivia-card');
+      const item = triviaQuestions[triviaIndex];
+      triviaAnswered = false;
+      document.getElementById('trivia-next-btn').classList.add('hidden');
+      document.getElementById('trivia-score').textContent = `${triviaScore}/${triviaQuestions.length}`;
+
+      card.innerHTML = `
+        <p class="text-xs text-gray-400 font-semibold">Question ${triviaIndex + 1} of ${triviaQuestions.length}</p>
+        <p class="text-sm font-bold text-white leading-snug">${item.q}</p>
+        <div class="space-y-2 mt-2">
+          ${item.options.map((opt, i) => `
+            <button 
+              onclick="answerTrivia(${i})" 
+              id="trivia-opt-${i}"
+              class="w-full text-left px-3.5 py-2 rounded-xl bg-surfaceCard hover:bg-gold/15 border border-white/10 text-xs font-medium text-gray-200 transition"
+            >
+              ${opt}
+            </button>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function answerTrivia(selectedIndex) {
+      if (triviaAnswered) return;
+      triviaAnswered = true;
+      const item = triviaQuestions[triviaIndex];
+      const nextBtn = document.getElementById('trivia-next-btn');
+
+      if (selectedIndex === item.correct) {
+        document.getElementById(`trivia-opt-${selectedIndex}`).className = 'w-full text-left px-3.5 py-2 rounded-xl bg-emerald-950 border border-emerald-500 text-xs font-bold text-emerald-300';
+        triviaScore++;
+        GunturSound.chimeReady();
+      } else {
+        document.getElementById(`trivia-opt-${selectedIndex}`).className = 'w-full text-left px-3.5 py-2 rounded-xl bg-rose-950 border border-rose-500 text-xs font-bold text-rose-300';
+        document.getElementById(`trivia-opt-${item.correct}`).className = 'w-full text-left px-3.5 py-2 rounded-xl bg-emerald-950 border border-emerald-500 text-xs font-bold text-emerald-300';
+      }
+
+      document.getElementById('trivia-score').textContent = `${triviaScore}/${triviaQuestions.length}`;
+      nextBtn.classList.remove('hidden');
+    }
+
+    function nextTriviaQuestion() {
+      triviaIndex++;
+      if (triviaIndex >= triviaQuestions.length) {
+        const card = document.getElementById('trivia-card');
+        card.innerHTML = `
+          <div class="text-center py-4 space-y-2">
+            <span class="text-3xl">🏆</span>
+            <h5 class="font-serif font-bold text-sm text-gold">Quiz Completed!</h5>
+            <p class="text-xs text-white">You scored ${triviaScore} out of ${triviaQuestions.length}!</p>
+            <p class="text-[11px] text-gray-400">You are a true Andhra cuisine connoisseur.</p>
+            <button onclick="triviaIndex=0;triviaScore=0;renderTriviaQuestion()" class="btn-gold px-4 py-2 rounded-xl text-xs font-bold mt-2">Play Again</button>
+          </div>
+        `;
+        document.getElementById('trivia-next-btn').classList.add('hidden');
+      } else {
+        renderTriviaQuestion();
+      }
+    }
+
+    // Check celebration banner & ready notifications
+    function checkReadyOrders() {
+      const orders = GunturDB.state.orders.filter(o => o.tableId === currentTableId);
+      const readyOrder = orders.find(o => o.status === 'READY');
+      const banner = document.getElementById('celebration-banner');
+      const dot = document.getElementById('orders-nav-dot');
+
+      if (readyOrder) {
+        banner.classList.remove('hidden');
+        dot.classList.remove('hidden');
+      } else {
+        banner.classList.add('hidden');
+        dot.classList.add('hidden');
+      }
+    }
+
+    function updateAllViews() {
+      renderCategories();
+      renderMenuItems();
+      renderHomeRecommendations();
+      updateCartBadge();
+      checkActiveServiceAlerts();
+      checkReadyOrders();
+      if (currentTab === 'cart') renderCartView();
+      if (currentTab === 'orders') renderOrdersView();
+      
+      // Update Wi-Fi settings from DB
+      const settings = GunturDB.state.settings;
+      if (settings) {
+        document.getElementById('wifi-ssid-display').textContent = settings.wifiSSID;
+        if (showWifiPw) {
+          document.getElementById('wifi-password-display').textContent = settings.wifiPassword;
+        }
+      }
+    }
+
+    // Initialize Page
+    window.addEventListener('DOMContentLoaded', () => {
+      initTableIdentification();
+      updateAllViews();
+
+      // Subscribe to real-time events
+      GunturDB.subscribe((state, meta) => {
+        updateAllViews();
+        if (meta && meta.type === 'ORDER_STATUS_CHANGED') {
+          const ord = state.orders.find(o => o.id === meta.orderId);
+          if (ord && ord.tableId === currentTableId) {
+            if (meta.newStatus === 'READY') {
+              GunturUtils.toast(`🎉 Your order #${ord.id} is READY! Our staff is serving it to your table.`, 'success', 5000);
+            } else if (meta.newStatus === 'ACCEPTED') {
+              GunturUtils.toast(`👨‍🍳 Reception accepted your order #${ord.id}! Chef is preparing.`, 'info');
+            } else if (meta.newStatus === 'SERVED') {
+              GunturUtils.toast(`🍽️ Order marked served. Enjoy your meal!`, 'success');
+            } else if (meta.newStatus === 'COMPLETED') {
+              GunturUtils.toast(`🧾 Your table bill has been settled by reception. Thank you!`, 'success', 6000);
+            }
+          }
+        }
+        if (meta && meta.type === 'SERVICE_REQUEST_RESOLVED') {
+          GunturUtils.toast(`✓ Staff attended to your service request.`, 'success');
+        }
+        if (meta && meta.type === 'SESSION') {
+          const details = GunturDB.getTableDetails(currentTableId);
+          if (!details.isOccupied) {
+            GunturUtils.toast(`🧾 Table ${currentTableId} has been freed/settled by reception.`, 'info', 5000);
+          }
+          updateHeaderBadges();
+        }
+      });
+    });
+  </script>
+</body>
+</html>

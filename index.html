@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nawabs — Royal Kitchen & Smart QR Dining</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            gold: '#E5C158',
+            goldLight: '#FBE8A6',
+            goldDark: '#B8860B',
+            royal: '#0A0A14',
+            surface: '#121224',
+            surfaceCard: 'rgba(22, 22, 42, 0.85)',
+            surfaceBorder: 'rgba(229, 193, 88, 0.2)'
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', 'sans-serif'],
+            serif: ['"Playfair Display"', 'Georgia', 'serif']
+          },
+          boxShadow: {
+            'gold-glow': '0 0 25px rgba(229, 193, 88, 0.25)',
+            'card-glow': '0 8px 32px 0 rgba(0, 0, 0, 0.45)'
+          }
+        }
+      }
+    };
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root { color-scheme: dark; }
+    body {
+      background-color: #07070F;
+      color: #F1F5F9;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      overflow-x: hidden;
+    }
+    .font-serif {
+      font-family: 'Playfair Display', Georgia, serif;
+    }
+    .glass-panel {
+      background: rgba(18, 18, 36, 0.75);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(229, 193, 88, 0.18);
+    }
+    .glass-gold {
+      background: linear-gradient(135deg, rgba(229, 193, 88, 0.12), rgba(229, 193, 88, 0.03));
+      border: 1px solid rgba(229, 193, 88, 0.35);
+    }
+    .btn-gold-luxury {
+      background: linear-gradient(135deg, #F3D270 0%, #D4AF37 50%, #AA7C11 100%);
+      color: #07070F;
+      font-weight: 700;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .btn-gold-luxury:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 25px -5px rgba(212, 175, 55, 0.45);
+    }
+    .hero-glow {
+      position: absolute;
+      width: 450px;
+      height: 450px;
+      background: radial-gradient(circle, rgba(212, 175, 55, 0.15) 0%, rgba(212, 175, 55, 0) 70%);
+      filter: blur(50px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .chip-table {
+      transition: all 0.2s ease;
+    }
+    .chip-table.selected {
+      background: linear-gradient(135deg, #F3D270, #D4AF37);
+      color: #07070F;
+      font-weight: 800;
+      border-color: #F3D270;
+      box-shadow: 0 0 16px rgba(212, 175, 55, 0.4);
+    }
+  </style>
+</head>
+<body class="min-h-screen relative flex flex-col justify-between selection:bg-gold selection:text-black">
+
+  <!-- Ambient Glow Backgrounds -->
+  <div class="hero-glow top-0 left-1/2 -translate-x-1/2"></div>
+  <div class="hero-glow top-1/3 -left-32 opacity-40"></div>
+  <div class="hero-glow bottom-10 right-0 opacity-40"></div>
+
+  <!-- Top Navigation Bar -->
+  <header class="sticky top-0 z-40 border-b border-gold/15 bg-[#07070F]/85 backdrop-blur-xl">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
+      <a href="index.html" class="flex items-center gap-3.5 group">
+        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-gold/25 via-gold/10 to-transparent border border-gold/40 flex items-center justify-center text-2xl shadow-lg group-hover:scale-105 transition">
+          🌶️
+        </div>
+        <div>
+          <span class="font-serif text-xl sm:text-2xl font-bold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-goldLight via-gold to-amber-400">
+            Nawabs
+          </span>
+          <p class="text-[11px] text-gray-400 tracking-wider uppercase font-medium">Royal Mughlai & Andhra Kitchen</p>
+        </div>
+      </a>
+
+      <!-- Quick Role Shortcuts -->
+      <div class="flex items-center gap-2 sm:gap-3 text-xs">
+        <button onclick="openMenuCardsModal()" class="hidden md:flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gold/10 hover:bg-gold/20 border border-gold/30 text-gold font-semibold transition">
+          <span>📖 Official Menu Cards</span>
+        </button>
+        <span class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+          Live Sync Active
+        </span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Hero Section -->
+  <main class="relative z-10 max-w-6xl mx-auto px-4 sm:px-6 py-8 md:py-12 flex-1 space-y-12">
+
+    <!-- Hero Banner -->
+    <div class="text-center max-w-3xl mx-auto space-y-4">
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gold/15 border border-gold/30 text-gold text-xs font-bold tracking-widest uppercase">
+        <span>✨ Modern Smart QR Restaurant Platform</span>
+      </div>
+      <h1 class="font-serif text-3xl sm:text-5xl md:text-6xl font-extrabold text-white leading-tight tracking-tight">
+        Royal Nawabi Flavours, <br/>
+        <span class="text-transparent bg-clip-text bg-gradient-to-r from-goldLight via-gold to-amber-400">
+          Seamlessly Connected.
+        </span>
+      </h1>
+      <p class="text-gray-300 text-sm sm:text-base max-w-2xl mx-auto leading-relaxed">
+        Order instantly from your dining table, view official high-resolution menu cards, and experience real-time synchronization across Reception, Kitchen Display (KDS), and Management.
+      </p>
+    </div>
+
+    <!-- PRIMARY ACTION: Dine-In Table Ordering Launcher -->
+    <section class="glass-panel rounded-3xl p-6 sm:p-8 border border-gold/35 shadow-card-glow relative overflow-hidden">
+      <div class="absolute -top-16 -right-16 w-48 h-48 bg-gold/15 rounded-full blur-3xl pointer-events-none"></div>
+
+      <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-6 mb-6">
+        <div>
+          <div class="flex items-center gap-2.5">
+            <span class="p-2 rounded-xl bg-gold/15 text-gold text-xl">🍽️</span>
+            <div>
+              <h2 class="font-serif text-2xl font-bold text-white">Guest Dining Check-In</h2>
+              <p class="text-xs sm:text-sm text-gray-400 mt-0.5">
+                Enter your details to open the live dining menu, or select your table below.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-surfaceCard border border-gold/30 text-xs text-gold">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="occupancy-summary-badge" class="font-mono font-semibold">Checking Tables...</span>
+        </div>
+      </div>
+
+      <!-- Form Inputs: Guest Name & Table Info -->
+      <div class="grid md:grid-cols-3 gap-4 mb-6">
+        <!-- Guest Name Input -->
+        <div class="md:col-span-2 space-y-1.5">
+          <label class="block text-xs font-bold text-gray-300 uppercase tracking-wider flex items-center justify-between">
+            <span>👤 Guest / Party Name</span>
+            <span class="text-[11px] text-gray-400 font-normal">Identifies your table on Reception & Kitchen KDS</span>
+          </label>
+          <div class="relative">
+            <input 
+              type="text" 
+              id="guest-name-input" 
+              placeholder="e.g., Ananya Rao / Vikram & Friends" 
+              class="w-full px-4 py-3.5 rounded-2xl bg-black/40 border border-gold/30 text-white placeholder-gray-500 text-sm font-medium focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition shadow-inner"
+              autocomplete="name"
+            />
+            <span class="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-gray-400">✍️</span>
+          </div>
+        </div>
+
+        <!-- Action Button -->
+        <div class="flex flex-col justify-end">
+          <button onclick="launchDining()" id="btn-launch-dining" class="btn-gold-luxury w-full py-3.5 px-6 rounded-2xl text-xs sm:text-sm font-black flex items-center justify-center gap-2 shadow-xl transition">
+            <span>Open Table Dining View</span>
+            <span class="text-base">→</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Occupied Warning Banner -->
+      <div id="occupied-table-warning" class="hidden mb-5 p-4 rounded-2xl bg-rose-500/10 border border-rose-500/40 text-rose-200 text-xs flex items-center justify-between gap-3">
+        <div class="flex items-center gap-2.5">
+          <span class="text-xl">🔒</span>
+          <div>
+            <strong class="font-bold text-rose-300 block">Table Currently Occupied</strong>
+            <span id="occupied-warning-text" class="text-gray-300">This table is already seated. Please pick an available green table.</span>
+          </div>
+        </div>
+        <button onclick="selectFirstFreeTable()" class="px-3.5 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 font-bold text-xs transition shrink-0">
+          Pick Free Table
+        </button>
+      </div>
+
+      <!-- Table Selector Chips (Tables 1 to 20) with Status -->
+      <div>
+        <div class="flex flex-wrap items-center justify-between text-xs mb-3 text-gray-300 font-medium gap-2">
+          <div class="flex items-center gap-2">
+            <span>Selected: <strong id="selected-table-label" class="text-gold font-bold text-sm">Table T07</strong></span>
+            <span id="selected-status-tag" class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">Free</span>
+          </div>
+          <div class="flex items-center gap-3 text-[11px] text-gray-400">
+            <span class="flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-400"></span> Free
+            </span>
+            <span class="flex items-center gap-1.5">
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span> Occupied
+            </span>
+            <span class="text-gray-500">| Tap any table to select</span>
+          </div>
+        </div>
+        <div class="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-10 gap-2" id="table-chips-grid">
+          <!-- Injected via JavaScript -->
+        </div>
+      </div>
+    </section>
+
+    <!-- SECTION: Official Printed Menu Cards Showcase -->
+    <section class="space-y-4">
+      <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+        <div>
+          <div class="flex items-center gap-2">
+            <span class="text-xl">📖</span>
+            <h2 class="font-serif text-2xl font-bold text-gold">Official Restaurant Menu Cards</h2>
+          </div>
+          <p class="text-xs text-gray-400 mt-0.5">Browse the 6 authentic physical menu card pages with authentic pricing & items</p>
+        </div>
+        <button onclick="openMenuCardsModal()" class="self-start sm:self-auto px-4 py-2 rounded-xl bg-gold/15 hover:bg-gold/25 border border-gold/30 text-gold text-xs font-bold transition flex items-center gap-1.5">
+          <span>Fullscreen Sheet Viewer</span>
+          <span>↗</span>
+        </button>
+      </div>
+
+      <!-- Cards Grid Preview -->
+      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5" id="menu-cards-showcase">
+        <!-- Injected via JS -->
+      </div>
+    </section>
+
+    <!-- SECTION: Restaurant Operations Portals -->
+    <section class="space-y-4">
+      <h2 class="font-serif text-2xl font-bold text-white">Restaurant Operational Portals</h2>
+      <div class="grid sm:grid-cols-3 gap-5">
+
+        <!-- 1. Reception Desk -->
+        <a href="reception.html" class="glass-panel rounded-3xl p-6 border border-gold/20 hover:border-gold/60 transition group shadow-xl flex flex-col justify-between space-y-4">
+          <div class="space-y-3">
+            <div class="w-14 h-14 rounded-2xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center text-3xl group-hover:scale-110 transition duration-300">
+              🛎️
+            </div>
+            <div>
+              <h3 class="font-serif font-bold text-lg text-white group-hover:text-gold transition">Reception Desk</h3>
+              <p class="text-xs text-gray-400 mt-1 leading-relaxed">
+                Accept incoming customer orders, dispatch orders to the kitchen, attend live table assistance requests, and print bills.
+              </p>
+            </div>
+          </div>
+          <div class="pt-3 border-t border-white/10 flex items-center justify-between text-xs font-bold text-indigo-400 group-hover:text-gold transition">
+            <span>Open Reception Portal</span>
+            <span>→</span>
+          </div>
+        </a>
+
+        <!-- 2. Chef Kitchen Display (KDS) -->
+        <a href="chef.html" class="glass-panel rounded-3xl p-6 border border-gold/20 hover:border-gold/60 transition group shadow-xl flex flex-col justify-between space-y-4">
+          <div class="space-y-3">
+            <div class="w-14 h-14 rounded-2xl bg-amber-500/15 border border-amber-500/30 flex items-center justify-center text-3xl group-hover:scale-110 transition duration-300">
+              👨‍🍳
+            </div>
+            <div>
+              <h3 class="font-serif font-bold text-lg text-white group-hover:text-gold transition">Chef KDS (Kitchen)</h3>
+              <p class="text-xs text-gray-400 mt-1 leading-relaxed">
+                Live kitchen tickets with real-time urgency timers, cooking status progression (Queued ➔ Cooking ➔ Ready), and sound chimes.
+              </p>
+            </div>
+          </div>
+          <div class="pt-3 border-t border-white/10 flex items-center justify-between text-xs font-bold text-amber-400 group-hover:text-gold transition">
+            <span>Open Kitchen Display</span>
+            <span>→</span>
+          </div>
+        </a>
+
+        <!-- 3. Admin & Executive Suite -->
+        <a href="admin.html" class="glass-panel rounded-3xl p-6 border border-gold/20 hover:border-gold/60 transition group shadow-xl flex flex-col justify-between space-y-4">
+          <div class="space-y-3">
+            <div class="w-14 h-14 rounded-2xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-3xl group-hover:scale-110 transition duration-300">
+              📊
+            </div>
+            <div>
+              <h3 class="font-serif font-bold text-lg text-white group-hover:text-gold transition">Executive Admin</h3>
+              <p class="text-xs text-gray-400 mt-1 leading-relaxed">
+                Live analytics, menu catalog editor, SQLite staff credential management, table QR code batch generator, and Wi-Fi settings.
+              </p>
+            </div>
+          </div>
+          <div class="pt-3 border-t border-white/10 flex items-center justify-between text-xs font-bold text-emerald-400 group-hover:text-gold transition">
+            <span>Open Admin Dashboard</span>
+            <span>→</span>
+          </div>
+        </a>
+
+      </div>
+    </section>
+
+    <!-- SECTION: Features & Authentic Heritage -->
+    <section class="glass-panel rounded-3xl p-6 sm:p-8 border border-white/10 grid sm:grid-cols-3 gap-6">
+      <div class="flex items-start gap-4">
+        <div class="text-2xl p-3 rounded-2xl bg-gold/10 text-gold border border-gold/20">🌶️</div>
+        <div>
+          <h4 class="font-bold text-sm text-white">Guntur Red Chillies</h4>
+          <p class="text-xs text-gray-400 mt-1">Fiery heat and rich crimson color from Andhra's spice capital.</p>
+        </div>
+      </div>
+      <div class="flex items-start gap-4">
+        <div class="text-2xl p-3 rounded-2xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">🌿</div>
+        <div>
+          <h4 class="font-bold text-sm text-white">Fresh Gongura Leaves</h4>
+          <p class="text-xs text-gray-400 mt-1">Tangy, authentic sorrel leaf curries slow-cooked to perfection.</p>
+        </div>
+      </div>
+      <div class="flex items-start gap-4">
+        <div class="text-2xl p-3 rounded-2xl bg-blue-500/10 text-blue-400 border border-blue-500/20">⚡</div>
+        <div>
+          <h4 class="font-bold text-sm text-white">Zero Wait Time Ordering</h4>
+          <p class="text-xs text-gray-400 mt-1">Instant QR-based ordering with live kitchen preparation tracking.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Interactive Fullscreen Menu Cards Modal -->
+  <div id="cards-modal" class="hidden fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-3 md:p-6">
+    <div class="relative w-full max-w-4xl bg-surfaceCard border border-gold/40 rounded-3xl overflow-hidden shadow-2xl flex flex-col max-h-[92vh]">
+      <!-- Modal Header -->
+      <div class="p-4 border-b border-white/10 flex items-center justify-between bg-black/40">
+        <div class="flex items-center gap-3">
+          <span class="text-2xl">📖</span>
+          <div>
+            <h3 id="card-modal-title" class="font-serif font-bold text-base text-gold">Nawabs — Official Menu Cards</h3>
+            <p id="card-modal-subtitle" class="text-xs text-gray-400">Page 1 of 6</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="toggleCardZoom()" class="p-2 px-3 rounded-xl bg-white/5 hover:bg-white/15 text-gray-300 text-xs border border-white/10 transition" title="Toggle Zoom">
+            🔍 Zoom
+          </button>
+          <button onclick="closeMenuCardsModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-gray-300 hover:text-white flex items-center justify-center text-sm font-bold transition">
+            ✕
+          </button>
+        </div>
+      </div>
+
+      <!-- Category Tabs for Menu Cards -->
+      <div id="cards-tab-bar" class="flex gap-1.5 overflow-x-auto p-2.5 bg-black/30 border-b border-white/5 text-xs no-scrollbar">
+        <!-- Injected via JS -->
+      </div>
+
+      <!-- Card Display Area -->
+      <div class="flex-1 overflow-auto p-4 flex items-center justify-center bg-black/70 relative">
+        <button onclick="prevCard()" class="absolute left-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-black/80 hover:bg-gold hover:text-charcoal border border-gold/40 text-gold flex items-center justify-center text-xl font-bold shadow-2xl transition z-10">
+          ‹
+        </button>
+        <div id="card-img-wrapper" class="transition-transform duration-200 origin-center max-w-full">
+          <img id="card-img" src="" alt="Menu Card" class="max-h-[68vh] rounded-2xl shadow-2xl border border-gold/30 object-contain mx-auto" />
+        </div>
+        <button onclick="nextCard()" class="absolute right-4 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-black/80 hover:bg-gold hover:text-charcoal border border-gold/40 text-gold flex items-center justify-center text-xl font-bold shadow-2xl transition z-10">
+          ›
+        </button>
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="p-4 bg-black/50 border-t border-white/10 flex items-center justify-between">
+        <span id="card-counter" class="text-xs text-gray-400 font-mono font-semibold">1 / 6</span>
+        <button onclick="orderFromCurrentCard()" class="btn-gold-luxury px-5 py-2.5 rounded-xl text-xs font-bold shadow-md flex items-center gap-2">
+          <span>Order From This Card</span>
+          <span>→</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="relative z-10 border-t border-gold/15 bg-[#05050B] py-6 px-4 text-center text-xs text-gray-500">
+    <p class="font-medium text-gray-400">Nawabs Restaurant OS</p>
+    <p class="mt-1">Powered by Node.js Server • SQLite <code class="text-gold">staff.db</code> • Firebase Cloud & ntfy.sh Realtime Sync</p>
+  </footer>
+
+  <script src="shared.js"></script>
+  <script>
+    let selectedTableNum = 7;
+    let activeCardIndex = 0;
+    let isZoomed = false;
+
+    // Render Table Chips with Strict Occupancy Protection
+    function renderTableChips() {
+      const container = document.getElementById('table-chips-grid');
+      if (!container) return;
+      let html = '';
+      let occupiedCount = 0;
+
+      for (let i = 1; i <= 20; i++) {
+        const tid = 'T' + String(i).padStart(2, '0');
+        const details = GunturDB.getTableDetails(tid);
+        const isOcc = details.isOccupied;
+        if (isOcc) occupiedCount++;
+
+        const isSel = i === selectedTableNum && !isOcc;
+
+        let chipClass = 'chip-table p-2 rounded-xl text-center border transition relative flex flex-col items-center justify-center ';
+        if (isOcc) {
+          // Strictly visually locked - occupied tables cannot be taken!
+          chipClass += 'bg-rose-950/20 border-rose-500/30 text-rose-300 opacity-60 hover:opacity-80 cursor-not-allowed';
+        } else if (isSel) {
+          chipClass += 'border-gold bg-gradient-to-b from-gold/30 to-gold/10 text-white shadow-[0_0_15px_rgba(229,193,88,0.35)] ring-2 ring-gold';
+        } else {
+          chipClass += 'bg-surfaceCard text-gray-300 border-white/10 hover:border-gold/40 hover:text-white cursor-pointer';
+        }
+
+        html += `
+          <button 
+            type="button"
+            onclick="${isOcc ? `handleOccupiedClick('${tid}', '${(details.guestName || 'Guest').replace(/'/g, "\'")}')` : `selectTable(${i})`}" 
+            class="${chipClass}"
+            title="${isOcc ? `Table ${tid} is Occupied by ${details.guestName || 'Guest'} - Unavailable` : `Table ${tid} Free - Available`}"
+          >
+            <span class="font-mono font-bold text-xs">${tid}</span>
+            <span class="text-[9px] font-semibold mt-0.5 truncate max-w-full px-0.5 ${
+              isOcc ? 'text-rose-400 font-bold' : 'text-emerald-400'
+            }">
+              ${isOcc ? '🔒 Occupied' : 'Free'}
+            </span>
+            ${isOcc ? '<span class="absolute top-1 right-1 w-1.5 h-1.5 rounded-full bg-rose-500"></span>' : ''}
+          </button>
+        `;
+      }
+      container.innerHTML = html;
+
+      const sumBadge = document.getElementById('occupancy-summary-badge');
+      if (sumBadge) {
+        sumBadge.textContent = `${occupiedCount} / 20 Occupied`;
+      }
+
+      // If current selection happens to be occupied, auto-pick first free
+      const currentTid = 'T' + String(selectedTableNum).padStart(2, '0');
+      if (GunturDB.isTableOccupied(currentTid)) {
+        selectFirstFreeTable();
+      } else {
+        updateSelectedTableInfo();
+      }
+    }
+
+    function handleOccupiedClick(tid, guestName) {
+      GunturUtils.toast(`🚫 Table ${tid} is already occupied by ${guestName}. Please select an available green table!`, 'error', 4500);
+      const warnBox = document.getElementById('occupied-table-warning');
+      const warnText = document.getElementById('occupied-warning-text');
+      if (warnBox && warnText) {
+        warnBox.classList.remove('hidden');
+        warnText.textContent = `Table ${tid} is currently occupied by "${guestName}". You cannot select an occupied table.`;
+      }
+    }
+
+    function updateSelectedTableInfo() {
+      const tid = 'T' + String(selectedTableNum).padStart(2, '0');
+      const details = GunturDB.getTableDetails(tid);
+      const isOcc = details.isOccupied;
+
+      const labelEl = document.getElementById('selected-table-label');
+      if (labelEl) labelEl.textContent = `Table ${tid}`;
+
+      const tagEl = document.getElementById('selected-status-tag');
+      const warnBox = document.getElementById('occupied-table-warning');
+
+      if (isOcc) {
+        if (tagEl) {
+          tagEl.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40';
+          tagEl.textContent = `Occupied • Locked`;
+        }
+        if (warnBox) warnBox.classList.remove('hidden');
+      } else {
+        if (tagEl) {
+          tagEl.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30';
+          tagEl.textContent = 'Free • Ready to Seat';
+        }
+        if (warnBox) warnBox.classList.add('hidden');
+      }
+    }
+
+    function selectTable(num) {
+      const tid = 'T' + String(num).padStart(2, '0');
+      if (GunturDB.isTableOccupied(tid)) {
+        GunturUtils.toast(`Table ${tid} is already occupied! Please choose a free table.`, 'error');
+        return;
+      }
+      selectedTableNum = num;
+      renderTableChips();
+    }
+
+    function selectFirstFreeTable() {
+      for (let i = 1; i <= 20; i++) {
+        const tid = 'T' + String(i).padStart(2, '0');
+        if (!GunturDB.isTableOccupied(tid)) {
+          selectedTableNum = i;
+          renderTableChips();
+          return;
+        }
+      }
+      GunturUtils.toast('All 20 dining tables are currently occupied!', 'info');
+      updateSelectedTableInfo();
+    }
+
+    function launchDining() {
+      const tid = 'T' + String(selectedTableNum).padStart(2, '0');
+      if (GunturDB.isTableOccupied(tid)) {
+        GunturUtils.toast(`Table ${tid} is already occupied! Please choose a free table.`, 'error', 4500);
+        selectFirstFreeTable();
+        return;
+      }
+
+      const nameInput = document.getElementById('guest-name-input');
+      let guestName = nameInput ? nameInput.value.trim() : '';
+
+      if (!guestName) {
+        guestName = prompt(`Enter Guest / Party Name for Table ${tid}:`, '');
+        if (!guestName || !guestName.trim()) {
+          GunturUtils.toast('Please enter your name to check in.', 'info');
+          if (nameInput) nameInput.focus();
+          return;
+        }
+      }
+
+      // Re-verify in real time before registering
+      if (GunturDB.isTableOccupied(tid)) {
+        GunturUtils.toast(`Table ${tid} was just occupied by someone else! Please pick an available table.`, 'error');
+        renderTableChips();
+        return;
+      }
+
+      // Register session in DB
+      const sess = GunturDB.registerTableSession(tid, guestName.trim());
+
+      // Save to sessionStorage for customer view
+      sessionStorage.setItem('CURRENT_TABLE_ID', tid);
+      sessionStorage.setItem('CURRENT_GUEST_NAME', guestName.trim());
+      sessionStorage.setItem('CURRENT_SESSION_TOKEN', sess.token);
+
+      // Navigate to customer.html
+      location.href = `customer.html?table=${tid}&guest=${encodeURIComponent(guestName.trim())}`;
+    }
+
+    // Render Showcase Menu Cards
+    function renderShowcaseCards() {
+      const container = document.getElementById('menu-cards-showcase');
+      const cards = GunturDB.menuCards || [];
+      container.innerHTML = cards.map((c, i) => `
+        <div onclick="openMenuCardsModal(${i})" class="glass-panel rounded-2xl p-2 cursor-pointer border border-gold/25 hover:border-gold/70 transition group shadow-lg flex flex-col">
+          <div class="relative overflow-hidden rounded-xl aspect-[9/16] bg-black/60 mb-2">
+            <img src="${c.file}" alt="${c.title}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300" />
+            <div class="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition"></div>
+            <span class="absolute top-1.5 left-1.5 px-2 py-0.5 rounded-full bg-black/80 text-[9px] font-bold text-gold border border-gold/30">
+              Page ${i + 1}
+            </span>
+          </div>
+          <p class="font-serif font-bold text-xs text-white line-clamp-1 group-hover:text-gold transition">${c.title}</p>
+          <span class="text-[10px] text-gray-400 mt-0.5">${c.category}</span>
+        </div>
+      `).join('');
+    }
+
+    // Modal Card Navigation
+    function initCardTabs() {
+      const tabs = document.getElementById('cards-tab-bar');
+      const cards = GunturDB.menuCards || [];
+      tabs.innerHTML = cards.map((c, i) => `
+        <button onclick="selectCard(${i})" class="px-3 py-1.5 rounded-xl whitespace-nowrap text-[11px] font-semibold transition ${
+          activeCardIndex === i ? 'bg-gold text-charcoal shadow-md' : 'bg-surfaceCard text-gray-300 border border-surfaceBorder hover:text-white'
+        }">
+          ${c.title}
+        </button>
+      `).join('');
+    }
+
+    function selectCard(idx) {
+      const cards = GunturDB.menuCards || [];
+      if (!cards.length) return;
+      activeCardIndex = (idx + cards.length) % cards.length;
+      const c = cards[activeCardIndex];
+      document.getElementById('card-img').src = c.file;
+      document.getElementById('card-modal-title').textContent = c.title;
+      document.getElementById('card-modal-subtitle').textContent = c.subtitle;
+      document.getElementById('card-counter').textContent = `${activeCardIndex + 1} / ${cards.length}`;
+      isZoomed = false;
+      document.getElementById('card-img-wrapper').style.transform = 'scale(1)';
+      initCardTabs();
+    }
+
+    function prevCard() { selectCard(activeCardIndex - 1); }
+    function nextCard() { selectCard(activeCardIndex + 1); }
+
+    function toggleCardZoom() {
+      isZoomed = !isZoomed;
+      document.getElementById('card-img-wrapper').style.transform = isZoomed ? 'scale(1.4)' : 'scale(1)';
+    }
+
+    function openMenuCardsModal(idx = 0) {
+      document.getElementById('cards-modal').classList.remove('hidden');
+      selectCard(idx);
+    }
+
+    function closeMenuCardsModal() {
+      document.getElementById('cards-modal').classList.add('hidden');
+    }
+
+    function orderFromCurrentCard() {
+      const cards = GunturDB.menuCards || [];
+      const current = cards[activeCardIndex];
+      const tid = 'T' + String(selectedTableNum).padStart(2, '0');
+      const cat = current ? current.category : 'All';
+      location.href = `customer.html?table=${tid}&category=${encodeURIComponent(cat)}`;
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      selectFirstFreeTable();
+      renderTableChips();
+      renderShowcaseCards();
+
+      // Real-time synchronization: when reception frees or settles a table, chips update live!
+      GunturDB.subscribe((state, meta) => {
+        renderTableChips();
+      });
+    });
+  </script>
+</body>
+</html>

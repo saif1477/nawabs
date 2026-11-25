@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nawabs — Reception Desk & Floor Gatekeeper</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            gold: '#E5C158',
+            goldLight: '#FBE8A6',
+            goldDark: '#B8860B',
+            charcoal: '#07070F',
+            deepSurface: '#07070F',
+            surfaceCard: '#121224',
+            surfaceBorder: 'rgba(229, 193, 88, 0.2)'
+          },
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', 'Inter', 'system-ui', 'sans-serif'],
+            serif: ['"Playfair Display"', 'Georgia', 'serif']
+          }
+        }
+      }
+    };
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root { color-scheme: dark; }
+    body {
+      background-color: #07070F;
+      color: #F1F5F9;
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    }
+    .font-serif { font-family: 'Playfair Display', Georgia, serif; }
+    .glass-card {
+      background: rgba(18, 18, 36, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(229, 193, 88, 0.18);
+    }
+    .btn-gold {
+      background: linear-gradient(135deg, #F3D270 0%, #D4AF37 50%, #B8860B 100%);
+      color: #07070F;
+      font-weight: 800;
+      transition: all 0.2s ease;
+    }
+    .btn-gold:hover {
+      box-shadow: 0 4px 20px rgba(229, 193, 88, 0.35);
+    }
+    @keyframes kdsRedPulse {
+      0%, 100% { border-color: rgba(239, 68, 68, 0.9); box-shadow: 0 0 20px rgba(239, 68, 68, 0.35); }
+      50% { border-color: rgba(239, 68, 68, 0.4); box-shadow: 0 0 8px rgba(239, 68, 68, 0.15); }
+    }
+    .urgency-red-pulse { animation: kdsRedPulse 1.8s infinite; }
+    .flash { animation: fl 1s infinite; }
+    @keyframes fl { 50% { opacity: .45; } }
+    .table-tile {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .table-tile:hover {
+      transform: translateY(-2px);
+    }
+  </style>
+</head>
+<body class="min-h-screen select-none flex flex-col justify-between">
+
+  <!-- Staff Login Gate (Shown first, hides dashboard) -->
+  <div id="login-gate" class="fixed inset-0 z-[100] bg-[#07070F] flex items-center justify-center p-4">
+    <div class="w-full max-w-sm space-y-6 text-center">
+      <!-- Logo & Branding -->
+      <div class="space-y-3">
+        <div class="w-16 h-16 rounded-2xl bg-gold/15 border-2 border-gold/50 flex items-center justify-center text-3xl mx-auto shadow-xl">
+          🛎️
+        </div>
+        <div>
+          <h1 class="font-serif text-2xl font-bold text-gold">Nawabs</h1>
+          <p class="text-xs text-gray-400 mt-1">Reception Desk & Floor Gatekeeper</p>
+        </div>
+      </div>
+
+      <!-- Login Card -->
+      <div class="glass-card rounded-3xl border border-gold/30 p-6 space-y-5 text-left shadow-2xl">
+        <div class="text-center">
+          <h2 class="font-serif font-bold text-lg text-white">Staff Login</h2>
+          <p class="text-[11px] text-gray-400 mt-1">Authorized personnel only. Enter your staff credentials.</p>
+        </div>
+
+        <!-- Error Banner -->
+        <div id="login-error" class="hidden p-3 rounded-xl bg-rose-500/15 border border-rose-500/40 text-rose-200 text-xs text-center font-semibold">
+          Invalid email or password
+        </div>
+
+        <div class="space-y-3.5">
+          <div class="space-y-1">
+            <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block">📧 Staff Email</label>
+            <input
+              type="email"
+              id="login-email"
+              placeholder="e.g., admin@restaurant.com"
+              class="w-full px-4 py-3 rounded-xl bg-black/50 border border-white/15 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition"
+              autocomplete="email"
+            />
+          </div>
+          <div class="space-y-1">
+            <label class="text-[11px] font-bold text-gray-300 uppercase tracking-wider block">🔒 Password</label>
+            <input
+              type="password"
+              id="login-password"
+              placeholder="Enter your password"
+              class="w-full px-4 py-3 rounded-xl bg-black/50 border border-white/15 text-white text-sm placeholder-gray-500 focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold transition"
+              autocomplete="current-password"
+            />
+          </div>
+        </div>
+
+        <button onclick="attemptLogin()" id="login-btn" class="btn-gold w-full py-3 rounded-xl text-sm font-black shadow-lg flex items-center justify-center gap-2 transition">
+          <span id="login-btn-text">Sign In to Reception</span>
+        </button>
+      </div>
+
+      <!-- Footer hint -->
+      <p class="text-[10px] text-gray-500">
+        Contact your restaurant manager if you don't have credentials.
+      </p>
+      <a href="index.html" class="inline-flex items-center gap-1.5 text-xs text-gray-400 hover:text-gold transition">
+        ← Back to Home
+      </a>
+    </div>
+  </div>
+
+  <!-- Main Dashboard (hidden until login) -->
+  <div id="dashboard-content" class="hidden p-4 md:p-6">
+
+  <!-- Header & Live Pipeline -->
+  <header class="space-y-4 pb-4 border-b border-white/10 mb-6">
+    <div class="flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3.5">
+        <div class="w-12 h-12 rounded-2xl bg-gold/15 border-2 border-gold/50 flex items-center justify-center text-2xl shadow-xl">
+          🛎️
+        </div>
+        <div>
+          <div class="flex items-center gap-2">
+            <h1 class="font-serif font-bold text-2xl text-gold">Nawabs</h1>
+            <span class="px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 text-xs font-bold border border-indigo-500/30">
+              Reception Desk & Floor Gatekeeper
+            </span>
+          </div>
+          <p class="text-xs text-gray-400 mt-0.5">"Never-Direct" Verification: Authorize customer orders before dispatching to Kitchen Chef KDS</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2.5 flex-wrap">
+        <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-surfaceCard border border-gold/30 text-xs text-gold">
+          <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+          <span id="logged-in-staff-name" class="font-semibold">Staff</span>
+        </div>
+        <button onclick="logoutStaff()" class="px-4 py-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-xs font-bold text-rose-300 hover:text-white transition">
+          🔒 Logout
+        </button>
+        <a href="index.html" class="px-4 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold text-white transition">
+          Exit Portal
+        </a>
+      </div>
+    </div>
+
+    <!-- Live Pipeline Breadcrumb Bar -->
+    <div class="glass-card rounded-2xl p-3 border border-gold/25 flex flex-wrap items-center justify-between gap-3 text-xs">
+      <div class="flex items-center gap-2 flex-wrap">
+        <span class="font-bold text-gray-400">Live Pipeline:</span>
+        <span class="px-2.5 py-1 rounded-xl bg-white/5 border border-white/10 text-gray-300 font-semibold">[Customer Table T07]</span>
+        <span class="text-gold font-bold">➔</span>
+        <span class="px-3 py-1 rounded-xl bg-gold/25 border border-gold/60 text-gold font-black shadow-md flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-gold animate-ping"></span>
+          [Reception Gatekeeper]
+        </span>
+        <span class="text-gold font-bold">➔</span>
+        <span class="px-2.5 py-1 rounded-xl bg-white/5 border border-white/10 text-gray-300 font-semibold">[Chef KDS]</span>
+        <span class="text-gold font-bold">➔</span>
+        <span class="px-2.5 py-1 rounded-xl bg-white/5 border border-white/10 text-gray-300 font-semibold">[Served & Billed]</span>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="text-gray-400 font-medium">Active Table Session:</span>
+        <span id="active-session-badge" class="px-3 py-1 rounded-full bg-amber-500/20 border border-amber-500/40 text-amber-300 font-black">
+          T07 (Occupied)
+        </span>
+      </div>
+    </div>
+
+    <!-- KPI / Metric Counters Bar -->
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-semibold">
+      <!-- 1. New Pending -->
+      <div class="p-3 rounded-2xl bg-indigo-950/50 border border-indigo-500/40 flex items-center justify-between">
+        <div>
+          <span class="text-indigo-300 text-[11px] block">New / Pending Approval</span>
+          <b id="c-new" class="text-2xl font-black text-white">0</b>
+        </div>
+        <span class="text-2xl p-2 rounded-xl bg-indigo-500/10 text-indigo-400">📥</span>
+      </div>
+
+      <!-- 2. Kitchen Cooking -->
+      <div class="p-3 rounded-2xl bg-amber-950/50 border border-amber-500/40 flex items-center justify-between">
+        <div>
+          <span class="text-amber-300 text-[11px] block">Kitchen Cooking</span>
+          <b id="c-cooking" class="text-2xl font-black text-white">0</b>
+        </div>
+        <span class="text-2xl p-2 rounded-xl bg-amber-500/10 text-amber-400">👨‍🍳</span>
+      </div>
+
+      <!-- 3. Ready to Serve -->
+      <div class="p-3 rounded-2xl bg-emerald-950/50 border border-emerald-500/40 flex items-center justify-between">
+        <div>
+          <span class="text-emerald-300 text-[11px] block">Ready to Serve</span>
+          <b id="c-ready" class="text-2xl font-black text-white">0</b>
+        </div>
+        <span class="text-2xl p-2 rounded-xl bg-emerald-500/10 text-emerald-400">🍽️</span>
+      </div>
+
+      <!-- 4. Active Service Calls -->
+      <div class="p-3 rounded-2xl bg-rose-950/50 border border-rose-500/40 flex items-center justify-between">
+        <div>
+          <span class="text-rose-300 text-[11px] block">Active Service Pings</span>
+          <b id="c-calls" class="text-2xl font-black text-white">0</b>
+        </div>
+        <span class="text-2xl p-2 rounded-xl bg-rose-500/10 text-rose-400">🔔</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Emergency Flash Banner for Service Requests -->
+  <div id="call-banner"></div>
+
+  <!-- Main Content Layout: Gatekeeper Feed (Left) & Live Floor Map (Right) -->
+  <main class="grid grid-cols-1 lg:grid-cols-12 gap-6 flex-1 items-start">
+
+    <!-- LEFT COLUMN: Gatekeeper Feed & Concierge Inbox (7 Cols) -->
+    <div class="lg:col-span-7 space-y-6">
+
+      <!-- Section: Live Order Gatekeeper Feed -->
+      <section class="space-y-3">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-lg">🧾</span>
+              <h2 class="font-serif font-bold text-xl text-gold">Live Order Gatekeeper Feed</h2>
+            </div>
+            <p class="text-xs text-gray-400 mt-0.5">"Never-Direct" verification: Approve orders to dispatch to Chef KDS</p>
+          </div>
+          <div class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-semibold">
+            <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>Live Gatekeeper Active</span>
+          </div>
+        </div>
+
+        <!-- Filter tabs for orders -->
+        <div class="flex gap-2 text-xs font-semibold overflow-x-auto pb-1 no-scrollbar">
+          <button onclick="setOrderFilter('all')" id="filter-all" class="px-3 py-1.5 rounded-xl bg-gold text-charcoal font-bold">All Orders</button>
+          <button onclick="setOrderFilter('PLACED')" id="filter-PLACED" class="px-3 py-1.5 rounded-xl bg-surfaceCard text-gray-300 border border-surfaceBorder hover:text-white">New Approvals (<span id="tab-cnt-placed">0</span>)</button>
+          <button onclick="setOrderFilter('PREPARING')" id="filter-PREPARING" class="px-3 py-1.5 rounded-xl bg-surfaceCard text-gray-300 border border-surfaceBorder hover:text-white">In Cooking (<span id="tab-cnt-cooking">0</span>)</button>
+          <button onclick="setOrderFilter('READY')" id="filter-READY" class="px-3 py-1.5 rounded-xl bg-surfaceCard text-gray-300 border border-surfaceBorder hover:text-white">Ready for Pickup (<span id="tab-cnt-ready">0</span>)</button>
+        </div>
+
+        <!-- Orders Stream Container -->
+        <div id="gatekeeper-feed" class="space-y-3 max-h-[650px] overflow-y-auto pr-1">
+          <!-- Injected via JS -->
+        </div>
+      </section>
+
+      <!-- Section: Call Staff Concierge Inbox -->
+      <section class="space-y-3 pt-2">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span class="text-lg">🔔</span>
+            <h2 class="font-serif font-bold text-xl text-gold">Call Staff Concierge Inbox</h2>
+          </div>
+          <span class="text-xs px-2.5 py-1 rounded-full bg-rose-500/20 text-rose-300 font-bold border border-rose-500/30">
+            Live Alerts
+          </span>
+        </div>
+        <p class="text-xs text-gray-400">Real-time waiter calls, water refills, cutlery, and bill requests from dining tables</p>
+
+        <div id="concierge-inbox" class="space-y-2.5">
+          <!-- Injected via JS -->
+        </div>
+      </section>
+      <!-- Section: Guest Dining Feedback & Ratings Feed -->
+      <section class="glass-card rounded-3xl p-5 border border-gold/30 shadow-2xl space-y-3 mt-4">
+        <div class="flex items-center justify-between border-b border-white/10 pb-2.5">
+          <div class="flex items-center gap-2">
+            <span class="text-lg">⭐</span>
+            <h3 class="font-serif font-bold text-base text-gold">Guest Dining Feedback & Ratings</h3>
+          </div>
+          <span id="feedback-count-badge" class="px-2 py-0.5 rounded-full bg-gold/20 text-gold text-[10px] font-bold border border-gold/30">
+            0 Reviews
+          </span>
+        </div>
+        <p class="text-xs text-gray-400">Feedback, star ratings, and compliments submitted by customers upon paying their bill</p>
+        <div id="feedback-inbox" class="space-y-2 max-h-56 overflow-y-auto pr-1">
+          <!-- Injected via JS -->
+        </div>
+      </section>
+
+
+    </div>
+
+    <!-- RIGHT COLUMN: Live 20-Table Floor Map & Table Settlement (5 Cols) -->
+    <div class="lg:col-span-5 space-y-4">
+      <section class="glass-card rounded-3xl p-5 border border-gold/30 shadow-2xl space-y-4">
+        <!-- Floor Map Header & Legend -->
+        <div class="flex items-center justify-between border-b border-white/10 pb-3">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xl">🗺️</span>
+              <h3 class="font-serif font-bold text-lg text-white">Live 20-Table Floor Map</h3>
+            </div>
+            <p class="text-xs text-gray-400 mt-0.5">Click occupied table to settle bill & clear</p>
+          </div>
+          <div class="flex items-center gap-3 text-xs font-bold">
+            <span class="flex items-center gap-1.5 text-emerald-400">
+              <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> Free
+            </span>
+            <span class="flex items-center gap-1.5 text-gold">
+              <span class="w-2.5 h-2.5 rounded-full bg-gold"></span> Occupied
+            </span>
+          </div>
+        </div>
+
+        <!-- 20 Table Interactive Grid -->
+        <div class="grid grid-cols-4 sm:grid-cols-5 gap-2.5" id="floor-map-grid">
+          <!-- Injected via JS: T01 to T20 -->
+        </div>
+
+        <!-- Floor Quick Stats & Action Hint -->
+        <div class="p-3 rounded-2xl bg-black/40 border border-white/5 text-[11px] text-gray-400 flex items-center justify-between">
+          <span>Occupancy: <b id="stat-occupancy-ratio" class="text-gold font-bold">0 / 20</b> Tables</span>
+          <span>Tip: Tap occupied table to view bill</span>
+        </div>
+      </section>
+    </div>
+
+  </main>
+
+  <!-- MODAL: Table Bill Settlement & Receipt -->
+  <div id="settle-modal" class="hidden fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="w-full max-w-lg bg-surfaceCard border border-gold/40 rounded-3xl overflow-hidden shadow-2xl p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150">
+      <div class="flex items-center justify-between border-b border-white/10 pb-3">
+        <div class="flex items-center gap-2.5">
+          <span class="p-2 rounded-xl bg-gold/15 text-gold text-lg">💳</span>
+          <div>
+            <h3 id="settle-table-title" class="font-serif font-bold text-lg text-gold">Table T07 Bill Settlement</h3>
+            <p id="settle-session-token" class="text-[11px] text-gray-400 font-mono">Session: T07-SESSION-ACTIVE</p>
+          </div>
+        </div>
+        <button onclick="closeSettleModal()" class="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-gray-300 hover:text-white flex items-center justify-center font-bold">✕</button>
+      </div>
+
+      <!-- Itemized Order History for Table -->
+      <div class="space-y-2">
+        <h4 class="text-xs font-bold text-gray-300 uppercase tracking-wider">Itemized Dining Orders</h4>
+        <div id="settle-items-list" class="space-y-2 max-h-56 overflow-y-auto pr-1 text-xs">
+          <!-- Injected via JS -->
+        </div>
+      </div>
+
+      <!-- Bill Breakdown & Totals -->
+      <div class="p-3.5 rounded-2xl bg-black/50 border border-white/10 space-y-1.5 text-xs">
+        <div class="flex justify-between text-gray-300">
+          <span>Subtotal (Food & Drinks):</span>
+          <span id="settle-subtotal" class="font-mono">₹0</span>
+        </div>
+        <div class="flex justify-between text-gray-300">
+          <span>GST Tax (5%):</span>
+          <span id="settle-tax" class="font-mono">₹0</span>
+        </div>
+        <div class="pt-2 border-t border-white/10 flex justify-between text-base font-extrabold text-gold">
+          <span>Total Payable Bill:</span>
+          <span id="settle-grand-total" class="font-mono">₹0</span>
+        </div>
+      </div>
+
+      <!-- Actions -->
+      <div class="grid grid-cols-2 gap-3 pt-2">
+        <button onclick="printReceipt()" class="px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-bold text-white transition flex items-center justify-center gap-1.5">
+          <span>🖨️ Print Receipt</span>
+        </button>
+        <button onclick="confirmSettleTable()" class="btn-gold px-4 py-2.5 rounded-xl text-xs font-black shadow-lg flex items-center justify-center gap-1.5 transition">
+          <span>✓ Settle Bill & Free Table</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  </div><!-- /dashboard-content -->
+
+  <script src="shared.js"></script>
+  <script>
+    let activeOrderFilter = 'all';
+    let selectedTableToSettle = null;
+
+    function setC(id, val) {
+      const el = document.getElementById(id);
+      if (el) el.textContent = val;
+    }
+
+    function setOrderFilter(f) {
+      activeOrderFilter = f;
+      ['all', 'PLACED', 'PREPARING', 'READY'].forEach(tab => {
+        const btn = document.getElementById(`filter-${tab}`);
+        if (!btn) return;
+        if (tab === f) {
+          btn.className = 'px-3 py-1.5 rounded-xl bg-gold text-charcoal font-bold';
+        } else {
+          btn.className = 'px-3 py-1.5 rounded-xl bg-surfaceCard text-gray-300 border border-surfaceBorder hover:text-white';
+        }
+      });
+      render();
+    }
+
+    function render() {
+      const st = GunturDB.state;
+      const calls = st.serviceRequests.filter(r => r.status === 'PENDING');
+      const allOrders = st.orders.filter(o => o.status !== 'REJECTED' && o.status !== 'COMPLETED');
+      
+      const newOrders = allOrders.filter(o => o.status === 'PLACED').sort((a,b) => a.createdAt - b.createdAt);
+      const cookingOrders = allOrders.filter(o => o.status === 'ACCEPTED' || o.status === 'PREPARING');
+      const readyOrders = allOrders.filter(o => o.status === 'READY');
+
+      // Update Counters
+      setC('c-new', newOrders.length);
+      setC('c-cooking', cookingOrders.length);
+      setC('c-ready', readyOrders.length);
+      setC('c-calls', calls.length);
+
+      setC('tab-cnt-placed', newOrders.length);
+      setC('tab-cnt-cooking', cookingOrders.length);
+      setC('tab-cnt-ready', readyOrders.length);
+
+      // Emergency Flash Banner
+      const banner = document.getElementById('call-banner');
+      if (calls.length > 0) {
+        banner.innerHTML = `
+          <div class="flash rounded-2xl p-3.5 mb-6 text-center font-bold text-xs text-white bg-rose-600 shadow-xl flex items-center justify-center gap-2">
+            <span>🚨 Active Concierge Alert: Service needed at Table ${[...new Set(calls.map(x => x.tableId))].join(', ')}</span>
+          </div>
+        `;
+      } else {
+        banner.innerHTML = '';
+      }
+
+      // Render Gatekeeper Feed
+      renderGatekeeperFeed(allOrders);
+
+      // Render Concierge Inbox
+      renderConciergeInbox(calls);
+      renderFeedbacks();
+
+      // Render Floor Map
+      renderFloorMap();
+    }
+
+    function renderGatekeeperFeed(orders) {
+      const feed = document.getElementById('gatekeeper-feed');
+      let filtered = orders;
+
+      if (activeOrderFilter === 'PLACED') filtered = orders.filter(o => o.status === 'PLACED');
+      else if (activeOrderFilter === 'PREPARING') filtered = orders.filter(o => o.status === 'ACCEPTED' || o.status === 'PREPARING');
+      else if (activeOrderFilter === 'READY') filtered = orders.filter(o => o.status === 'READY');
+
+      if (!filtered.length) {
+        feed.innerHTML = `
+          <div class="p-8 text-center glass-card rounded-2xl border border-white/5 text-gray-400 space-y-2">
+            <span class="text-3xl">☕</span>
+            <p class="text-xs font-semibold">No orders currently under this filter.</p>
+            <p class="text-[11px] text-gray-500">Awaiting customer orders placed from dining table QR codes.</p>
+          </div>
+        `;
+        return;
+      }
+
+      feed.innerHTML = filtered.map(o => {
+        const u = GunturUtils.getUrgencyColor(o.createdAt);
+        const timeStr = GunturUtils.formatTime(o.createdAt);
+        const orderCode = 'ORD-' + (o.id.length > 4 ? o.id.slice(-4) : o.id);
+
+        let statusBadge = '';
+        if (o.status === 'PLACED') {
+          statusBadge = `<span class="px-2.5 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 font-bold border border-indigo-500/40 text-[10px]">Pending Approval</span>`;
+        } else if (o.status === 'ACCEPTED') {
+          statusBadge = `<span class="px-2.5 py-0.5 rounded-full bg-teal-500/20 text-teal-300 font-bold border border-teal-500/40 text-[10px]">Accepted</span>`;
+        } else if (o.status === 'PREPARING') {
+          statusBadge = `<span class="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-300 font-bold border border-amber-500/40 text-[10px]">Cooking</span>`;
+        } else if (o.status === 'READY') {
+          statusBadge = `<span class="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/40 text-[10px] animate-pulse">Ready to Serve</span>`;
+        } else if (o.status === 'SERVED') {
+          statusBadge = `<span class="px-2.5 py-0.5 rounded-full bg-blue-500/20 text-blue-300 font-bold border border-blue-500/40 text-[10px]">Served</span>`;
+        }
+
+        return `
+          <div class="glass-card rounded-3xl p-4 border-2 ${u.border} space-y-3 hover:border-gold/50 transition shadow-lg">
+            <!-- Order Header -->
+            <div class="flex items-center justify-between border-b border-white/10 pb-2.5">
+              <div class="flex items-center gap-2.5">
+                <span class="px-3 py-1 rounded-xl bg-gold/20 text-gold font-black text-sm border border-gold/40">
+                  ${o.tableId}
+                </span>
+                <div>
+                  <div class="flex items-center gap-1.5">
+                    <span class="font-mono text-xs font-bold text-white tracking-wide">${orderCode}</span>
+                    <span class="text-xs font-bold text-goldLight">• ${o.guestName || 'Guest'}</span>
+                  </div>
+                  <span class="text-[11px] text-gray-400">${timeStr}</span>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2">
+                ${statusBadge}
+                <span class="font-bold text-sm text-gold font-mono">${GunturUtils.formatCurrency(o.total)}</span>
+              </div>
+            </div>
+
+            <!-- Itemized Dishes Breakdown -->
+            <div class="space-y-1.5 py-1 text-xs">
+              ${o.items.map(it => `
+                <div class="flex items-center justify-between text-gray-200">
+                  <div class="flex items-center gap-2">
+                    <span class="w-5 h-5 rounded-md bg-white/5 flex items-center justify-center font-bold text-gold text-[11px]">${it.qty}×</span>
+                    <span>${it.name}</span>
+                  </div>
+                  <span class="font-mono text-gray-400 text-[11px]">${GunturUtils.formatCurrency(it.price * it.qty)}</span>
+                </div>
+              `).join('')}
+            </div>
+
+            ${(o.notes || o.cookingInstructions) ? `
+              <div class="p-2.5 rounded-xl bg-amber-950/60 border border-amber-500/50 text-[11px] text-amber-100 flex items-start gap-2 shadow-inner">
+                <span class="text-sm">👨‍🍳</span>
+                <div class="space-y-0.5">
+                  <span class="font-bold text-amber-300 block text-[10px] uppercase tracking-wider">Cooking Instructions / Guest Note:</span>
+                  <p class="font-medium text-white">${o.notes || o.cookingInstructions}</p>
+                </div>
+              </div>
+            ` : ''}
+
+            <!-- Action Buttons based on Status -->
+            <div class="flex items-center justify-between pt-1">
+              <div class="text-[11px] text-gray-400 font-mono">
+                Wait Time: <span class="tick text-white font-bold" data-ts="${o.createdAt}">${GunturUtils.getElapsedMMSS(o.createdAt)}</span>
+              </div>
+
+              <div class="flex items-center gap-2">
+                ${
+                  o.status === 'PLACED' ? `
+                    <button onclick="rejectOrder('${o.id}')" class="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-rose-600 text-gray-300 hover:text-white text-xs font-bold transition">
+                      Decline
+                    </button>
+                    <button onclick="acceptOrder('${o.id}')" class="btn-gold px-4 py-1.5 rounded-xl text-xs font-black shadow-md flex items-center gap-1">
+                      <span>Accept ➔ Chef KDS</span>
+                    </button>
+                  ` : o.status === 'READY' ? `
+                    <button onclick="serveOrder('${o.id}')" class="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs shadow-lg flex items-center gap-1">
+                      <span>🍽️ Send Staff to Serve</span>
+                    </button>
+                  ` : o.status === 'SERVED' ? `
+                    <button onclick="openTableSettlement('${o.tableId}')" class="px-3.5 py-1.5 rounded-xl bg-gold/20 border border-gold/40 text-gold hover:bg-gold hover:text-charcoal font-bold text-xs transition">
+                      Settle Table Bill
+                    </button>
+                  ` : `
+                    <span class="text-[11px] text-gray-400 italic">Dispatched to kitchen</span>
+                  `
+                }
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    
+    function renderFeedbacks() {
+      const fbContainer = document.getElementById('feedback-inbox');
+      const countBadge = document.getElementById('feedback-count-badge');
+      if (!fbContainer) return;
+
+      const feedbacks = (typeof GunturDB.getFeedbacks === 'function') ? GunturDB.getFeedbacks() : [];
+      if (countBadge) countBadge.textContent = `${feedbacks.length} Reviews`;
+
+      if (!feedbacks.length) {
+        fbContainer.innerHTML = `
+          <div class="p-3 text-center glass-card rounded-2xl border border-white/5 text-gray-500 text-xs">
+            No guest dining feedback submitted yet. Ratings will appear here upon customer bill payment.
+          </div>
+        `;
+        return;
+      }
+
+      fbContainer.innerHTML = feedbacks.slice().reverse().map(fb => `
+        <div class="glass-card rounded-2xl p-3 border border-gold/20 space-y-1.5 shadow-md">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 rounded-lg bg-gold/20 text-gold font-bold text-xs border border-gold/30">
+                Table ${fb.tableId}
+              </span>
+              <span class="text-xs font-bold text-white">${fb.guestName || 'Guest'}</span>
+            </div>
+            <div class="flex items-center gap-1 text-gold text-xs font-bold">
+              <span>${'★'.repeat(fb.rating)}${'☆'.repeat(5 - fb.rating)}</span>
+              <span class="text-[10px] text-gray-400">(${fb.rating}/5)</span>
+            </div>
+          </div>
+          ${fb.comment ? `<p class="text-xs text-gray-300 italic pl-1">"${fb.comment}"</p>` : ''}
+          <div class="flex items-center justify-between text-[10px] text-gray-500 pt-1">
+            <span class="flex items-center gap-1">
+              ${(fb.tags || []).map(t => `<span class="px-1.5 py-0.2 rounded bg-white/5 text-goldLight">${t}</span>`).join(' ')}
+            </span>
+            <span>${GunturUtils.formatTime(fb.createdAt)}</span>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderConciergeInbox(calls) {
+      const container = document.getElementById('concierge-inbox');
+      if (!calls.length) {
+        container.innerHTML = `
+          <div class="p-4 text-center glass-card rounded-2xl border border-white/5 text-gray-500 text-xs">
+            No active concierge service calls. All tables attended!
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = calls.map(r => `
+        <div class="glass-card rounded-2xl p-3 border border-rose-500/40 flex items-center justify-between gap-3 shadow-lg">
+          <div class="flex items-center gap-2.5">
+            <span class="px-2.5 py-1 rounded-xl bg-rose-500/20 text-rose-300 font-black text-xs border border-rose-500/40">
+              Table ${r.tableId}
+            </span>
+            <div>
+              <b class="text-white text-xs block">${r.type}</b>
+              <span class="text-[10px] text-gray-400 font-mono tick" data-ts="${r.createdAt}">
+                ${GunturUtils.getElapsedMMSS(r.createdAt)} ago
+              </span>
+            </div>
+          </div>
+          <button onclick="attendCall('${r.id}')" class="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-md flex items-center gap-1 transition">
+            <span>✓ Done</span>
+          </button>
+        </div>
+      `).join('');
+    }
+
+    // 20-Table Interactive Floor Map
+    function renderFloorMap() {
+      const container = document.getElementById('floor-map-grid');
+      let occupiedCount = 0;
+      let html = '';
+      const activeOccupiedList = [];
+
+      for (let i = 1; i <= 20; i++) {
+        const tid = 'T' + String(i).padStart(2, '0');
+        const details = GunturDB.getTableDetails(tid);
+        const isOcc = details.isOccupied;
+
+        if (isOcc) {
+          occupiedCount++;
+          activeOccupiedList.push(`${tid} (${details.guestName || 'Guest'})`);
+          html += `
+            <div onclick="openTableSettlement('${tid}')" class="table-tile p-2 rounded-2xl bg-gold/15 border-2 border-gold/60 text-center cursor-pointer shadow-lg hover:border-goldLight relative group transition flex flex-col justify-between">
+              <span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-gold animate-ping"></span>
+              <div>
+                <span class="font-mono font-black text-xs text-gold block">${tid}</span>
+                <span class="text-[9px] font-bold text-amber-300 block uppercase tracking-wider mt-0.5">Occupied</span>
+              </div>
+              <div class="mt-1">
+                <span class="text-[10px] font-bold text-white block truncate max-w-full px-1" title="${details.guestName || 'Guest'}">${details.guestName || 'Guest'}</span>
+                <span class="text-[10px] text-gold font-mono font-black block">${details.total > 0 ? GunturUtils.formatCurrency(details.total) : 'Seated'}</span>
+              </div>
+            </div>
+          `;
+        } else {
+          html += `
+            <div onclick="promptOpenFreeTable('${tid}')" class="table-tile p-2 rounded-2xl bg-black/40 border border-white/10 text-center cursor-pointer hover:border-emerald-500/50 hover:bg-emerald-500/5 transition flex flex-col justify-between">
+              <div>
+                <span class="font-mono font-bold text-xs text-gray-400 block">${tid}</span>
+                <span class="text-[9px] font-semibold text-emerald-400 block uppercase tracking-wider mt-0.5">Free</span>
+              </div>
+              <div class="mt-1">
+                <span class="text-[10px] text-gray-500 font-mono block">Available</span>
+                <span class="text-[9px] text-gray-600 block">+ Seat</span>
+              </div>
+            </div>
+          `;
+        }
+      }
+
+      container.innerHTML = html;
+      setC('stat-occupancy-ratio', `${occupiedCount} / 20`);
+      
+      // Update top header active session badge
+      const activeBadge = document.getElementById('active-session-badge');
+      if (activeBadge) {
+        if (activeOccupiedList.length > 0) {
+          activeBadge.textContent = `${activeOccupiedList.slice(0, 3).join(', ')}${activeOccupiedList.length > 3 ? ` +${activeOccupiedList.length - 3}` : ''} (${occupiedCount} Active)`;
+        } else {
+          activeBadge.textContent = 'All Tables Available';
+        }
+      }
+    }
+
+    // Actions
+    function acceptOrder(id) {
+      GunturDB.updateOrderStatus(id, 'ACCEPTED');
+      GunturSound.chimeKitchen();
+      GunturUtils.toast('Order dispatched to Chef KDS!', 'success');
+    }
+
+    function rejectOrder(id) {
+      const r = prompt('Reason for declining order (displayed to diner):', 'Kitchen at capacity or item 86.');
+      if (r === null) return;
+      GunturDB.updateOrderStatus(id, 'REJECTED', { rejectReason: r });
+      GunturUtils.toast('Order declined', 'info');
+    }
+
+    function serveOrder(id) {
+      GunturDB.updateOrderStatus(id, 'SERVED');
+      GunturSound.chimeReady();
+      GunturUtils.toast('Staff dispatched to deliver food to table!', 'success');
+    }
+
+    function attendCall(id) {
+      GunturDB.resolveServiceRequest(id);
+      GunturUtils.toast('Service request closed', 'success');
+    }
+
+    // Modal Table Settlement - Combined Bill across all orders in session
+    function openTableSettlement(tid) {
+      selectedTableToSettle = tid;
+      const details = GunturDB.getTableDetails(tid);
+      const combined = GunturDB.getCombinedTableBill(tid);
+      const orders = combined.orders || [];
+
+      document.getElementById('settle-table-title').textContent = `Table ${tid} Combined Bill Settlement`;
+      document.getElementById('settle-session-token').innerHTML = `
+        <span class="text-gold font-bold">Guest: ${details.guestName || combined.guestName || 'Walk-in Guest'}</span> • 
+        <span>Orders Placed: <strong class="text-emerald-400">${combined.ordersCount}</strong></span> • 
+        <span>Session: ${details.sessionToken || `${tid}-SESSION`}</span>
+      `;
+
+      const listContainer = document.getElementById('settle-items-list');
+
+      // Check if guest submitted feedback
+      const allFeedbacks = (typeof GunturDB.getFeedbacks === 'function') ? GunturDB.getFeedbacks() : [];
+      const tableFeedback = allFeedbacks.find(f => f.tableId === tid);
+
+      let feedbackSnippet = '';
+      if (tableFeedback) {
+        feedbackSnippet = `
+          <div class="p-2.5 rounded-xl bg-amber-950/40 border border-amber-500/40 text-xs text-amber-200 mb-2 flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="text-gold font-bold text-sm">${'★'.repeat(tableFeedback.rating)}${'☆'.repeat(5 - tableFeedback.rating)}</span>
+              <span class="text-white text-[11px]">"${tableFeedback.comment || (tableFeedback.tags || []).join(', ') || 'Satisfied'}"</span>
+            </div>
+            <span class="text-[10px] text-gray-400">${tableFeedback.paymentMethod ? 'Paid via ' + tableFeedback.paymentMethod : 'Customer Feedback'}</span>
+          </div>
+        `;
+      }
+
+      if (!orders.length) {
+        listContainer.innerHTML = feedbackSnippet + `
+          <div class="p-4 rounded-xl bg-black/40 border border-white/5 text-center text-xs text-gray-400">
+            <span class="text-amber-400 font-bold block mb-1">Seated Table (No Food Orders Placed Yet)</span>
+            Guest checked in as <strong>${details.guestName || 'Guest'}</strong>.
+          </div>
+        `;
+      } else {
+        const orderBadges = orders.map((o, idx) => `
+          <div class="p-2.5 rounded-xl bg-black/40 border border-white/10 space-y-1">
+            <div class="flex items-center justify-between text-gray-300 font-bold text-xs">
+              <span class="flex items-center gap-1.5">
+                <span class="px-1.5 py-0.5 rounded bg-white/10 text-gold text-[10px]">Order #${idx + 1} (${o.id.slice(-4)})</span>
+                <span class="text-[11px] font-normal text-gray-400">${GunturUtils.formatTime(o.createdAt)}</span>
+                <span class="text-[10px] px-1.5 py-0.2 rounded ${o.status === 'SERVED' ? 'bg-blue-500/20 text-blue-300' : 'bg-amber-500/20 text-amber-300'} font-bold">${o.status}</span>
+              </span>
+              <span class="text-gold font-mono">${GunturUtils.formatCurrency(o.total)}</span>
+            </div>
+            <div class="text-[11px] text-gray-400 pl-2">
+              ${o.items.map(it => `${it.qty}× ${it.name}`).join(', ')}
+            </div>
+            ${(o.notes || o.cookingInstructions) ? `<div class="text-[10px] text-amber-300 pl-2 font-mono">Note: ${o.notes || o.cookingInstructions}</div>` : ''}
+          </div>
+        `).join('');
+
+        const combinedItemsList = `
+          <div class="p-3 rounded-xl bg-gold/5 border border-gold/20 space-y-1.5 mt-2">
+            <div class="text-[11px] font-bold text-gold uppercase tracking-wider flex items-center justify-between border-b border-gold/20 pb-1">
+              <span>🧾 Consolidated Items Total (${combined.ordersCount} Orders Combined)</span>
+              <span>Qty × Price</span>
+            </div>
+            ${combined.combinedItems.map(it => `
+              <div class="flex items-center justify-between text-xs text-gray-200">
+                <span class="flex items-center gap-2">
+                  <span class="w-5 h-5 rounded bg-white/5 flex items-center justify-center font-bold text-gold text-[11px]">${it.qty}×</span>
+                  <span>${it.name}</span>
+                </span>
+                <span class="font-mono text-gray-300">${GunturUtils.formatCurrency(it.price * it.qty)}</span>
+              </div>
+            `).join('')}
+          </div>
+        `;
+
+        listContainer.innerHTML = feedbackSnippet + orderBadges + combinedItemsList;
+      }
+
+      document.getElementById('settle-subtotal').textContent = GunturUtils.formatCurrency(combined.subtotal);
+      document.getElementById('settle-tax').textContent = GunturUtils.formatCurrency(combined.tax);
+      document.getElementById('settle-grand-total').textContent = GunturUtils.formatCurrency(combined.grandTotal);
+
+      document.getElementById('settle-modal').classList.remove('hidden');
+    }
+
+    function closeSettleModal() {
+      document.getElementById('settle-modal').classList.add('hidden');
+      selectedTableToSettle = null;
+    }
+
+    function confirmSettleTable() {
+      if (!selectedTableToSettle) return;
+      const tid = selectedTableToSettle;
+      GunturDB.settleTable(tid);
+      GunturSound.chimeReady();
+      GunturUtils.toast(`Table ${tid} bill settled and table marked FREE!`, 'success', 4000);
+      closeSettleModal();
+      render();
+    }
+
+    function printReceipt() {
+      window.print();
+    }
+
+    function promptOpenFreeTable(tid) {
+      const guestName = prompt(`Seat new guest at Table ${tid}. Enter Guest / Party Name:`, 'Walk-in Guest');
+      if (!guestName || !guestName.trim()) return;
+      GunturDB.registerTableSession(tid, guestName.trim());
+      GunturUtils.toast(`Table ${tid} seated with ${guestName.trim()}!`, 'success');
+      render();
+    }
+
+    // Ticking elapsed time counter every second
+    setInterval(() => {
+      document.querySelectorAll('.tick').forEach(e => {
+        const ts = Number(e.dataset.ts);
+        if (ts) e.textContent = GunturUtils.getElapsedMMSS(ts);
+      });
+    }, 1000);
+
+    // ---- Staff Login Logic ----
+    let loggedInStaff = null;
+
+    async function attemptLogin() {
+      const emailInput = document.getElementById('login-email');
+      const pwInput = document.getElementById('login-password');
+      const errBox = document.getElementById('login-error');
+      const btn = document.getElementById('login-btn');
+      const btnText = document.getElementById('login-btn-text');
+
+      const email = emailInput.value.trim();
+      const password = pwInput.value.trim();
+
+      if (!email || !password) {
+        errBox.textContent = 'Please enter both email and password.';
+        errBox.classList.remove('hidden');
+        return;
+      }
+
+      btnText.textContent = 'Signing in...';
+      btn.disabled = true;
+      errBox.classList.add('hidden');
+
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password })
+        });
+        const data = await res.json();
+
+        if (data.ok && data.staff) {
+          loggedInStaff = data.staff;
+          sessionStorage.setItem('RECEPTION_STAFF', JSON.stringify(data.staff));
+          unlockDashboard();
+        } else {
+          errBox.textContent = data.error || 'Invalid email or password.';
+          errBox.classList.remove('hidden');
+          pwInput.value = '';
+          pwInput.focus();
+        }
+      } catch (err) {
+        errBox.textContent = 'Server connection failed. Is the server running?';
+        errBox.classList.remove('hidden');
+      }
+
+      btnText.textContent = 'Sign In to Reception';
+      btn.disabled = false;
+    }
+
+    function unlockDashboard() {
+      document.getElementById('login-gate').classList.add('hidden');
+      document.getElementById('dashboard-content').classList.remove('hidden');
+      const nameEl = document.getElementById('logged-in-staff-name');
+      if (nameEl && loggedInStaff) {
+        nameEl.textContent = `${loggedInStaff.name} (${loggedInStaff.role})`;
+      }
+      render();
+    }
+
+    function logoutStaff() {
+      sessionStorage.removeItem('RECEPTION_STAFF');
+      loggedInStaff = null;
+      document.getElementById('dashboard-content').classList.add('hidden');
+      document.getElementById('login-gate').classList.remove('hidden');
+      document.getElementById('login-email').value = '';
+      document.getElementById('login-password').value = '';
+      document.getElementById('login-error').classList.add('hidden');
+    }
+
+    // Allow Enter key to submit login
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !document.getElementById('login-gate').classList.contains('hidden')) {
+        attemptLogin();
+      }
+    });
+
+    window.addEventListener('DOMContentLoaded', () => {
+      // Check if already logged in this session
+      const savedStaff = sessionStorage.getItem('RECEPTION_STAFF');
+      if (savedStaff) {
+        try {
+          loggedInStaff = JSON.parse(savedStaff);
+          unlockDashboard();
+        } catch (e) {
+          // Invalid data, stay on login
+        }
+      }
+
+      GunturDB.subscribe((s, m) => {
+        if (!loggedInStaff) return;
+        render();
+        if (m.type === 'ORDER_CREATED') {
+          GunturSound.chimeReception();
+          GunturUtils.toast(`📥 Gatekeeper Alert: New Order from Table ${m.tableId}!`, 'info', 4000);
+        }
+        if (m.type === 'SERVICE_REQUEST_CREATED') {
+          GunturSound.alarm();
+          GunturUtils.toast(`🔔 Concierge Ping: Table ${m.tableId} (${m.reqType})`, 'error', 6000);
+        }
+        if (m.type === 'ORDER_STATUS_CHANGED' && m.newStatus === 'READY') {
+          GunturSound.chimeReady();
+          GunturUtils.toast(`🍽️ Chef KDS Alert: Table ${m.tableId} dishes are READY!`, 'success', 5000);
+        }
+      });
+    });
+  </script>
+</body>
+</html>
