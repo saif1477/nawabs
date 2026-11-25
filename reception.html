@@ -881,12 +881,7 @@
       errBox.classList.add('hidden');
 
       try {
-        const res = await fetch('/api/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password })
-        });
-        const data = await res.json();
+        const data = await GunturDB.authenticateStaff(email, password);
 
         if (data.ok && data.staff) {
           loggedInStaff = data.staff;
@@ -899,7 +894,7 @@
           pwInput.focus();
         }
       } catch (err) {
-        errBox.textContent = 'Server connection failed. Is the server running?';
+        errBox.textContent = 'Login failed. Please try again.';
         errBox.classList.remove('hidden');
       }
 

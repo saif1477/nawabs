@@ -108,12 +108,18 @@
     u: 0
   };
 
+  const DEFAULT_STAFF = [
+    { email: 'staff@restaurant.com', password: 'password123', name: 'Standard Staff', role: 'Staff', created_at: '2026-01-01T00:00:00.000Z' },
+    { email: 'admin@restaurant.com', password: 'admin123', name: 'Restaurant Admin', role: 'Manager', created_at: '2026-01-01T00:00:00.000Z' }
+  ];
+
   function fresh() {
     return {
       menu: JSON.parse(JSON.stringify(DEFAULT_MENU)),
       orders: [],
       serviceRequests: [],
       feedbacks: [],
+      staff: JSON.parse(JSON.stringify(DEFAULT_STAFF)),
       settings: { ...DEFAULT_SETTINGS },
       sessions: {},
       tomb: {},
@@ -144,6 +150,7 @@
     persist();
   }
   if (!Array.isArray(S.feedbacks)) S.feedbacks = [];
+  if (!Array.isArray(S.staff) || !S.staff.length) S.staff = JSON.parse(JSON.stringify(DEFAULT_STAFF));
 
   const subs = new Set();
   const notify = meta => subs.forEach(fn => {
@@ -230,6 +237,11 @@
       if (j >= 0) S.feedbacks[j] = i;
       else S.feedbacks.unshift(i);
       return { type: 'FEEDBACK_RECEIVED', feedback: i };
+    }
+
+    if (op.k === 'staff') {
+      S.staff = Array.isArray(i) ? i : (S.staff || JSON.parse(JSON.stringify(DEFAULT_STAFF)));
+      return { type: 'STAFF_CHANGED' };
     }
 
     return null;
@@ -556,6 +568,122 @@
         occupiedTables: occupiedSet.size,
         popularItems: Object.entries(counts).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count).slice(0, 6)
       };
+    },
+
+    async authenticateStaff(email, password) {
+      const cleanEmail = (email || '').trim().toLowerCase();
+      const cleanPw = (password || '').trim();
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: cleanEmail, password: cleanPw })
+        });
+        const ct = (res.headers.get('content-type') || '').toLowerCase();
+        if (ct.includes('application/json')) {
+          return await res.json();
+        }
+      } catch (e) {
+        // Fallback when deployed statically (e.g., Vercel without Node server.js)
+      }
+
+      const list = Array.isArray(S.staff) && S.staff.length ? S.staff : DEFAULT_STAFF;
+      const match = list.find(s => (s.email || '').toLowerCase() === cleanEmail && s.password === cleanPw);
+      if (match) {
+        return { ok: true, staff: { email: match.email, name: match.name, role: match.role } };
+      }
+      return { ok: false, error: 'Invalid email or password.' };
+    },
+
+    async getStaffList() {
+      try {
+        const res = await fetch('/api/staff');
+        const ct = (res.headers.get('content-type') || '').toLowerCase();
+        if (res.ok && ct.includes('application/json')) {
+          const data = await res.json();
+          if (data.ok && Array.isArray(data.staff)) return data.staff;
+        }
+      } catch (e) {}
+      return Array.isArray(S.staff) && S.staff.length ? S.staff : DEFAULT_STAFF;
+    },
+
+    async addStaffAccount({ name, email, password, role }) {
+      const cleanEmail = (email || '').trim();
+      const cleanPw = (password || '').trim();
+      const cleanName = (name || cleanEmail.split('@')[0]).trim();
+      const cleanRole = (role || 'Staff').trim();
+      try {
+        const res = await fetch('/api/staff', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: cleanName, email: cleanEmail, password: cleanPw, role: cleanRole })
+        });
+        const ct = (res.headers.get('content-type') || '').toLowerCase();
+        if (ct.includes('application/json')) {
+          const data = await res.json();
+          return { ok: res.ok, ...data };
+        }
+      } catch (e) {}
+
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cleanEmail)) {
+        return { ok: false, error: 'Please enter a valid email address' };
+      }
+      S.staff = Array.isArray(S.staff) && S.staff.length ? S.staff : JSON.parse(JSON.stringify(DEFAULT_STAFF));
+      if (S.staff.some(s => (s.email || '').toLowerCase() === cleanEmail.toLowerCase())) {
+        return { ok: false, error: `Staff email "${cleanEmail}" already exists!` };
+      }
+      S.staff.push({ email: cleanEmail, password: cleanPw, name: cleanName, role: cleanRole, created_at: new Date().toISOString() });
+      persist();
+      publish({ k: 'staff', i: S.staff });
+      notify({ type: 'STAFF_CHANGED' });
+      return { ok: true, msg: 'Staff account created!' };
+    },
+
+    async updateStaffPassword(email, password) {
+      const cleanPw = (password || '').trim();
+      try {
+        const res = await fetch(`/api/staff/${encodeURIComponent(email)}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password: cleanPw })
+        });
+        const ct = (res.headers.get('content-type') || '').toLowerCase();
+        if (ct.includes('application/json')) {
+          const data = await res.json();
+          return { ok: res.ok, ...data };
+        }
+      } catch (e) {}
+
+      S.staff = Array.isArray(S.staff) && S.staff.length ? S.staff : JSON.parse(JSON.stringify(DEFAULT_STAFF));
+      const idx = S.staff.findIndex(s => (s.email || '').toLowerCase() === email.toLowerCase());
+      if (idx >= 0) {
+        S.staff[idx].password = cleanPw;
+        persist();
+        publish({ k: 'staff', i: S.staff });
+        return { ok: true, msg: 'Password updated!' };
+      }
+      return { ok: false, error: 'Staff account not found' };
+    },
+
+    async deleteStaffAccount(email) {
+      try {
+        const res = await fetch(`/api/staff/${encodeURIComponent(email)}`, { method: 'DELETE' });
+        const ct = (res.headers.get('content-type') || '').toLowerCase();
+        if (ct.includes('application/json')) {
+          const data = await res.json();
+          return { ok: res.ok, ...data };
+        }
+      } catch (e) {}
+
+      S.staff = Array.isArray(S.staff) && S.staff.length ? S.staff : JSON.parse(JSON.stringify(DEFAULT_STAFF));
+      if (S.staff.length <= 1) {
+        return { ok: false, error: 'Cannot delete the only remaining staff account!' };
+      }
+      S.staff = S.staff.filter(s => (s.email || '').toLowerCase() !== email.toLowerCase());
+      persist();
+      publish({ k: 'staff', i: S.staff });
+      notify({ type: 'STAFF_CHANGED' });
+      return { ok: true, msg: 'Staff account deleted' };
     }
   };
 

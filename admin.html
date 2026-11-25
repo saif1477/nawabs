@@ -793,21 +793,9 @@
       const tbody = document.getElementById('staff-table-body');
       tbody.innerHTML = '<tr><td colspan="5" class="p-6 text-center text-gray-400">Loading staff database...</td></tr>';
       try {
-        const res = await fetch('/api/staff');
-        if (res.ok) {
-          const data = await res.json();
-          staffAccounts = data.staff || [];
-        } else {
-          staffAccounts = [
-            { email: 'staff@restaurant.com', name: 'Standard Staff', role: 'Staff', created_at: new Date().toISOString() },
-            { email: 'admin@restaurant.com', name: 'Restaurant Admin', role: 'Manager', created_at: new Date().toISOString() }
-          ];
-        }
+        staffAccounts = await GunturDB.getStaffList();
       } catch (e) {
-        staffAccounts = [
-          { email: 'staff@restaurant.com', name: 'Standard Staff', role: 'Staff', created_at: new Date().toISOString() },
-          { email: 'admin@restaurant.com', name: 'Restaurant Admin', role: 'Manager', created_at: new Date().toISOString() }
-        ];
+        staffAccounts = [];
       }
 
       if (!staffAccounts.length) {
@@ -859,21 +847,16 @@
       }
 
       try {
-        const res = await fetch('/api/staff', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ name, email, password, role })
-        });
-        const data = await res.json();
-        if (res.ok) {
-          GunturUtils.toast('Staff account created in SQLite database!', 'success');
+        const data = await GunturDB.addStaffAccount({ name, email, password, role });
+        if (data.ok) {
+          GunturUtils.toast(data.msg || 'Staff account created!', 'success');
           closeAddStaffModal();
           loadStaffList();
         } else {
           GunturUtils.toast(data.error || 'Failed to create staff account', 'error');
         }
       } catch (err) {
-        GunturUtils.toast('Could not connect to server API', 'error');
+        GunturUtils.toast('Could not create staff account', 'error');
       }
     }
 
@@ -883,37 +866,29 @@
         return GunturUtils.toast('Password must be at least 6 characters!', 'error');
       }
       try {
-        const res = await fetch(`/api/staff/${encodeURIComponent(email)}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ password: pw.trim() })
-        });
-        if (res.ok) {
-          GunturUtils.toast('Password updated in SQLite database!', 'success');
+        const d = await GunturDB.updateStaffPassword(email, pw.trim());
+        if (d.ok) {
+          GunturUtils.toast(d.msg || 'Password updated!', 'success');
         } else {
-          const d = await res.json();
           GunturUtils.toast(d.error || 'Failed to update password', 'error');
         }
       } catch (e) {
-        GunturUtils.toast('Could not connect to server API', 'error');
+        GunturUtils.toast('Could not update password', 'error');
       }
     }
 
     async function deleteStaffAccount(email) {
       if (!confirm(`Are you sure you want to delete staff account ${email}?`)) return;
       try {
-        const res = await fetch(`/api/staff/${encodeURIComponent(email)}`, {
-          method: 'DELETE'
-        });
-        if (res.ok) {
-          GunturUtils.toast('Staff account deleted', 'success');
+        const d = await GunturDB.deleteStaffAccount(email);
+        if (d.ok) {
+          GunturUtils.toast(d.msg || 'Staff account deleted', 'success');
           loadStaffList();
         } else {
-          const d = await res.json();
           GunturUtils.toast(d.error || 'Cannot delete staff account', 'error');
         }
       } catch (e) {
-        GunturUtils.toast('Could not connect to server API', 'error');
+        GunturUtils.toast('Could not delete staff account', 'error');
       }
     }
 
@@ -951,12 +926,7 @@
       errBox.classList.add('hidden');
 
       try {
-        const res = await fetch('/api/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ email, password })
-        });
-        const data = await res.json();
+        const data = await GunturDB.authenticateStaff(email, password);
 
         if (data.ok && data.staff) {
           if (data.staff.role !== 'Manager' && data.staff.role !== 'Admin') {
@@ -976,7 +946,7 @@
           pwInput.focus();
         }
       } catch (err) {
-        errBox.textContent = 'Server connection failed. Is the server running?';
+        errBox.textContent = 'Authentication failed. Please try again.';
         errBox.classList.remove('hidden');
       }
 
